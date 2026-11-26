@@ -6,7 +6,18 @@ endpoints live in ``forecast``; model-metric endpoints live in ``models``.
 
 from fastapi import APIRouter
 
-from app.api import experiments, export, forecast, health, insights, jobs, models, pairs, quality
+from app.api import (
+    experiments,
+    export,
+    forecast,
+    health,
+    insights,
+    jobs,
+    markets,
+    models,
+    pairs,
+    quality,
+)
 
 api_router = APIRouter()
 api_router.include_router(health.router)
@@ -18,3 +29,4 @@ api_router.include_router(export.router)
 api_router.include_router(experiments.router)
 api_router.include_router(insights.router)
 api_router.include_router(jobs.router)
+api_router.include_router(markets.router)

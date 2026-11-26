@@ -68,7 +68,7 @@ def usd_gap(free_irr: float, official_irr: float) -> dict[str, float]:
 
 def cross_market_check(
     gold18_market_irr: float, xau_usd: float, usd_irr_free: float
-) -> dict[str, object]:
+) -> dict[str, float | str]:
     """Compare local 18k gram price with the implied cross-market value.
 
     Returns a verdict dict. NEVER auto-corrects; deviations are warnings.
