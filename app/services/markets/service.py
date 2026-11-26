@@ -29,13 +29,16 @@ def _demo_rng(instr_id: str) -> random.Random:
 
 
 _DEMO_BASE = {
+    # Anchors are mutually consistent with the derived formulas (documented):
+    # implied 24k/g = 4200 × 1.15e6 / 31.1035 ≈ 155.29e6 IRR; 18k ≈ ×0.75;
+    # Emami intrinsic = 7.3224 g fine × implied 24k ≈ 1.137e9 IRR.
     "XAU_USD": 4200.0,
     "USD_IRR_FREE": 1_150_000.0,
     "USD_IRR_OFFICIAL": 850_000.0,
-    "GOLD18_IRR": 128_000_000.0,
-    "COIN_EMAMI_IRR": 115_000_000.0,
-    "COIN_HALF_IRR": 62_000_000.0,
-    "COIN_QUARTER_IRR": 36_000_000.0,
+    "GOLD18_IRR": 118_800_000.0,
+    "COIN_EMAMI_IRR": 1_200_000_000.0,
+    "COIN_HALF_IRR": 640_000_000.0,
+    "COIN_QUARTER_IRR": 340_000_000.0,
     "USDT_IRT": 118_000.0,
     "EUR_USD": 1.08,
     "GBP_USD": 1.27,
@@ -207,6 +210,7 @@ def market_overview(prefer_toman: bool = True, now: datetime | None = None) -> d
         "generated_at": now.isoformat(),
         "global": {
             "gold": quotes["XAU_USD"],
+            "dollar_index": quotes["DXY_STYLE_BASKET"],
             "basket": basket_members,
             "drivers": drivers,
         },

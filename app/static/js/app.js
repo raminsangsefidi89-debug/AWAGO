@@ -4,6 +4,7 @@ import { faDate } from "./core/format.js";
 import { startRouter, route, navigate } from "./core/router.js";
 import { badge, esc } from "./core/ui.js";
 import { comparePage, overviewPage, pairPage, qualityPage } from "./pages/pages_core.js";
+import { driversPage, marketsPage, newsPage } from "./pages/pages_market.js";
 import {
   backtestsPage,
   evaluationPage,
@@ -58,6 +59,9 @@ refreshHealth();
 const mount = document.getElementById("page");
 route("", overviewPage);
 route("overview", overviewPage);
+route("markets", marketsPage);
+route("news", newsPage);
+route("drivers", driversPage);
 route("pair/:symbol", pairPage);
 route("compare", comparePage);
 route("models", modelsPage);
