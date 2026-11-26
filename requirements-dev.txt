@@ -1,0 +1,5 @@
+# Development / test dependencies
+-r requirements.txt
+pytest>=8.0
+Pillow>=10.0
+ruff>=0.4

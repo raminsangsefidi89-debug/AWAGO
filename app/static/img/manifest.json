@@ -1,0 +1,116 @@
+{
+  "images": [
+    {
+      "filename": "hero-bg.webp",
+      "placeholder_filename": "hero-bg.svg",
+      "dimensions": "1920x800",
+      "purpose": "Dashboard header/hero background behind a dark gradient overlay.",
+      "prompt": "Wide abstract banner background representing global currency markets: flowing luminous candlestick-like bars and smooth glowing price curves over a faint world-grid, depth of field, calm and professional, leave the center-right area relatively empty for overlay text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "logo-mark.png",
+      "placeholder_filename": "logo-mark.svg",
+      "dimensions": "1024x1024",
+      "purpose": "AWAGO emblem in the header, favicon source (32x32 and 180x180 exports).",
+      "prompt": "Minimal abstract emblem for a forecasting platform: a stylized upward-curving arrow blended with a wave and a subtle compass-like ring, geometric, symmetrical, teal and gold gradient on a transparent background, flat vector look, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": "2026-11-26",
+      "status": "fallback-placeholder-png",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "empty-state.webp",
+      "placeholder_filename": "empty-state.svg",
+      "dimensions": "800x600",
+      "purpose": "Shown when no data is available for the selected pair/range.",
+      "prompt": "Illustration of an empty chart panel: a clean dashboard frame with a faint dotted baseline and a small magnifying glass hovering over blank space, soft glow, friendly and calm mood. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "error-state.webp",
+      "placeholder_filename": "error-state.svg",
+      "dimensions": "800x600",
+      "purpose": "Shown on API/network errors.",
+      "prompt": "Illustration of a disconnected data link: two glowing nodes with a gently broken connecting line and small sparks, a subtle warning-amber accent, calm rather than alarming, tidy composition. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "training-state.webp",
+      "placeholder_filename": "training-state.svg",
+      "dimensions": "800x600",
+      "purpose": "Shown while a model training or data collection job is running.",
+      "prompt": "Illustration of a machine-learning model being trained: layered translucent neural-network nodes connected by glowing lines feeding into a rising line chart, sense of motion and progress. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "demo-banner-bg.webp",
+      "placeholder_filename": "demo-banner-bg.svg",
+      "dimensions": "1600x300",
+      "purpose": "Background of the prominent Demo-data banner, under a semi-transparent overlay.",
+      "prompt": "Wide thin strip pattern in amber and navy: diagonal soft hatching with faint broken chart lines, indicating a simulated environment, subtle, low contrast, seamless feel. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "card-forecast.webp",
+      "placeholder_filename": "card-forecast.svg",
+      "dimensions": "640x400",
+      "purpose": "Illustration for the forecast feature card.",
+      "prompt": "A smooth price line that continues into the future as a dashed glowing path, surrounded by a translucent widening cone representing uncertainty, on a dark grid. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "card-trend.webp",
+      "placeholder_filename": "card-trend.svg",
+      "dimensions": "640x400",
+      "purpose": "Illustration for the trend-analysis feature card.",
+      "prompt": "A noisy price series with a clean bright trend line cutting through it and a subtle directional arrow, layered moving-average ribbons in teal and gold, dark grid. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "card-evaluation.webp",
+      "placeholder_filename": "card-evaluation.svg",
+      "dimensions": "640x400",
+      "purpose": "Illustration for the model-evaluation feature card.",
+      "prompt": "Two competing glowing curves, one labeled-by-color as the model and one as the baseline, with a magnified comparison zone and a small balance-scale motif, dark grid, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    },
+    {
+      "filename": "og-image.webp",
+      "placeholder_filename": "og-image.svg",
+      "dimensions": "1200x630",
+      "purpose": "Social preview (Open Graph / Twitter card) referenced in the HTML head.",
+      "prompt": "Cinematic wide composition of a futuristic currency analytics dashboard floating in space: glowing charts, forecast bands, and a faint globe made of data points, centered focal point with generous margins, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
+      "generation_date": null,
+      "status": "fallback-placeholder",
+      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
+      "recorded_on": "2026-11-26"
+    }
+  ],
+  "image_limit": 10,
+  "generated_count": 0
+}
