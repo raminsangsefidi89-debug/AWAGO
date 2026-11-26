@@ -6,7 +6,7 @@ import pandas as pd
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.api.errors import DataUnavailableError
+from app.api.errors import DataUnavailableError, ModelNotFoundErrorAPI
 from app.api.params import normalize_pair, pair_or_404
 from app.db.engine import get_db
 from app.schemas.forecast import ForecastResponse, IndicatorResponse, TrendResponse
@@ -14,14 +14,13 @@ from app.services.forecasting.inference import ModelNotFoundError, forecast_pair
 from app.services.market import get_history
 from app.services.trend import analyze_trend
 
-from app.api.errors import ModelNotFoundErrorAPI
-
 router = APIRouter(tags=["forecasting"])
 
 
 # ------------------------------------------------------------------
 # Forecast
 # ------------------------------------------------------------------
+
 
 def _forecast_response(symbol: str, horizon: int, db: Session) -> ForecastResponse:
     pair_or_404(db, symbol)
@@ -68,6 +67,7 @@ def get_forecast_split(
 # ------------------------------------------------------------------
 # Indicators
 # ------------------------------------------------------------------
+
 
 def _indicator_response(symbol: str, db: Session) -> IndicatorResponse:
     pair_or_404(db, symbol)

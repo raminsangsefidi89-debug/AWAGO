@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from datetime import date, datetime, timedelta, timezone
-from typing import Dict, Iterable, List, Optional, Tuple
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -17,7 +17,7 @@ from app.services.data_providers import PriceBarData, get_provider
 logger = get_logger(__name__)
 
 # Persian display names for the default pairs (kept with the pair registry).
-PAIR_NAMES_FA: Dict[str, str] = {
+PAIR_NAMES_FA: dict[str, str] = {
     "EUR/USD": "یورو / دلار آمریکا",
     "GBP/USD": "پوند انگلیس / دلار آمریکا",
     "USD/JPY": "دلار آمریکا / ین ژاپن",
@@ -42,7 +42,7 @@ def validate_pair_symbol(symbol: str) -> str:
     return symbol
 
 
-def ensure_pairs(session: Session, settings: Optional[Settings] = None) -> List[CurrencyPair]:
+def ensure_pairs(session: Session, settings: Settings | None = None) -> list[CurrencyPair]:
     """Create the configured pairs in the database if missing (idempotent)."""
     settings = settings or get_settings()
     existing = {p.symbol: p for p in session.scalars(select(CurrencyPair)).all()}
@@ -69,18 +69,30 @@ def ensure_pairs(session: Session, settings: Optional[Settings] = None) -> List[
 
 def _naive_utc(ts: datetime) -> datetime:
     """Normalize to naive UTC for reliable comparisons with SQLite-stored values."""
+    if isinstance(ts, date) and not isinstance(ts, datetime):
+        ts = datetime(ts.year, ts.month, ts.day)
     if ts.tzinfo is not None:
         return ts.astimezone(timezone.utc).replace(tzinfo=None)
     return ts
 
 
-def upsert_bars(session: Session, pair_symbol: str, bars: Iterable[PriceBarData], data_source: str) -> int:
+def upsert_bars(
+    session: Session,
+    pair_symbol: str,
+    bars: Iterable[PriceBarData],
+    data_source: str,
+    dataset_version: str | None = None,
+) -> int:
     """Insert bars with de-duplication on (pair, timestamp, interval, data_source).
 
     Returns the number of newly inserted bars. Robust against concurrent
     collectors: unique-constraint conflicts are skipped, not raised.
+    Every inserted bar carries provenance (fetched_at, dataset_version,
+    quality_flag). The Parquet series mirror is refreshed after the commit.
     """
     is_demo = data_source == "demo"
+    fetched_at = datetime.now(timezone.utc)
+    dataset_version = dataset_version or f"{data_source}:{fetched_at.date().isoformat()}"
     inserted = 0
     existing_keys = {
         _naive_utc(ts)
@@ -90,7 +102,9 @@ def upsert_bars(session: Session, pair_symbol: str, bars: Iterable[PriceBarData]
                 PriceBar.interval == "1d",
                 PriceBar.data_source == data_source,
             )
-        ).scalars().all()
+        )
+        .scalars()
+        .all()
     }
 
     pending = []
@@ -117,6 +131,9 @@ def upsert_bars(session: Session, pair_symbol: str, bars: Iterable[PriceBarData]
                 volume=bar.volume,
                 data_source=data_source,
                 is_demo=is_demo,
+                fetched_at=fetched_at,
+                dataset_version=dataset_version,
+                quality_flag="ok",
             )
             for bar in chunk
         ]
@@ -135,16 +152,45 @@ def upsert_bars(session: Session, pair_symbol: str, bars: Iterable[PriceBarData]
                 except IntegrityError:
                     continue
     session.commit()
+    if inserted:
+        try:
+            sync_series_mirror(session, pair_symbol, data_source)
+        except Exception as exc:
+            logger.warning("Series mirror sync failed for %s/%s: %s", pair_symbol, data_source, exc)
     return inserted
+
+
+def sync_series_mirror(session: Session, pair_symbol: str, data_source: str) -> None:
+    """Refresh the Parquet mirror for one (pair, source) series."""
+    import pandas as pd
+
+    from app.services.storage.series import write_series
+
+    bars = get_history(session, pair_symbol, data_source=data_source)
+    if not bars:
+        return
+    df = pd.DataFrame(
+        {
+            "timestamp": [b.timestamp for b in bars],
+            "open": [b.open for b in bars],
+            "high": [b.high for b in bars],
+            "low": [b.low for b in bars],
+            "close": [b.close for b in bars],
+            "volume": [b.volume for b in bars],
+            "quality_flag": [b.quality_flag for b in bars],
+            "dataset_version": [b.dataset_version for b in bars],
+        }
+    )
+    write_series(df, pair_symbol, data_source)
 
 
 def collect_data(
     session: Session,
-    settings: Optional[Settings] = None,
-    pairs: Optional[List[str]] = None,
-    start: Optional[date] = None,
-    end: Optional[date] = None,
-) -> Dict:
+    settings: Settings | None = None,
+    pairs: list[str] | None = None,
+    start: date | None = None,
+    end: date | None = None,
+) -> dict:
     """Fetch history for the given (or all) pairs and persist it.
 
     Returns a summary dict: per-pair inserted counts, the data source that was
@@ -157,7 +203,7 @@ def collect_data(
     start = start or (end - timedelta(days=settings.history_days))
 
     targets = [validate_pair_symbol(p) for p in pairs] if pairs else list(settings.pairs_list)
-    summary: Dict = {
+    summary: dict = {
         "start": start.isoformat(),
         "end": end.isoformat(),
         "pairs": {},
@@ -168,7 +214,13 @@ def collect_data(
         bars = provider.fetch_history(symbol, start, end)
         inserted = upsert_bars(session, symbol, bars, provider.name)
         summary["pairs"][symbol] = {"fetched": len(bars), "inserted": inserted}
-        logger.info("collect_data %s: fetched=%d inserted=%d source=%s", symbol, len(bars), inserted, provider.name)
+        logger.info(
+            "collect_data %s: fetched=%d inserted=%d source=%s",
+            symbol,
+            len(bars),
+            inserted,
+            provider.name,
+        )
 
     summary["data_source"] = getattr(provider, "last_source", provider.name)
     summary["fallback_used"] = bool(getattr(provider, "fallback_used", False))
@@ -178,11 +230,11 @@ def collect_data(
 def get_history(
     session: Session,
     pair_symbol: str,
-    start: Optional[datetime] = None,
-    end: Optional[datetime] = None,
-    limit: Optional[int] = None,
-    data_source: Optional[str] = None,
-) -> List[PriceBar]:
+    start: datetime | None = None,
+    end: datetime | None = None,
+    limit: int | None = None,
+    data_source: str | None = None,
+) -> list[PriceBar]:
     """Return bars for a pair (chronological). If data_source is None, use the pair's active source."""
     pair_symbol = validate_pair_symbol(pair_symbol)
     if data_source is None:
@@ -210,11 +262,13 @@ def get_history(
             .limit(limit)
             .subquery()
         )
-        stmt = select(PriceBar).join(sub, PriceBar.id == sub.c.id).order_by(PriceBar.timestamp.asc())
+        stmt = (
+            select(PriceBar).join(sub, PriceBar.id == sub.c.id).order_by(PriceBar.timestamp.asc())
+        )
     return list(session.scalars(stmt).all())
 
 
-def get_active_source(session: Session, pair_symbol: str) -> Optional[str]:
+def get_active_source(session: Session, pair_symbol: str) -> str | None:
     """Data source of the most recent bar for the pair (the 'active' source)."""
     row = session.execute(
         select(PriceBar.data_source)
@@ -225,7 +279,7 @@ def get_active_source(session: Session, pair_symbol: str) -> Optional[str]:
     return row[0] if row else None
 
 
-def get_latest_bar(session: Session, pair_symbol: str) -> Optional[PriceBar]:
+def get_latest_bar(session: Session, pair_symbol: str) -> PriceBar | None:
     pair_symbol = validate_pair_symbol(pair_symbol)
     source = get_active_source(session, pair_symbol)
     if source is None:
@@ -242,7 +296,7 @@ def get_latest_bar(session: Session, pair_symbol: str) -> Optional[PriceBar]:
     ).first()
 
 
-def get_previous_bar(session: Session, pair_symbol: str) -> Optional[PriceBar]:
+def get_previous_bar(session: Session, pair_symbol: str) -> PriceBar | None:
     pair_symbol = validate_pair_symbol(pair_symbol)
     source = get_active_source(session, pair_symbol)
     if source is None:
@@ -266,11 +320,13 @@ def count_bars(session: Session) -> int:
     return int(session.scalar(select(func.count(PriceBar.id))) or 0)
 
 
-def pairs_overview(session: Session) -> List[Tuple[CurrencyPair, Optional[PriceBar]]]:
+def pairs_overview(session: Session) -> list[tuple[CurrencyPair, PriceBar | None]]:
     """All active pairs with their latest bar (may be None)."""
     result = []
     for pair in session.scalars(
-        select(CurrencyPair).where(CurrencyPair.is_active.is_(True)).order_by(CurrencyPair.sort_order)
+        select(CurrencyPair)
+        .where(CurrencyPair.is_active.is_(True))
+        .order_by(CurrencyPair.sort_order)
     ).all():
         result.append((pair, get_latest_bar(session, pair.symbol)))
     return result

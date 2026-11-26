@@ -20,15 +20,17 @@ from common import bootstrap
 
 bootstrap()
 
-from app.config import get_settings  # noqa: E402
-from app.db.engine import init_db, session_scope  # noqa: E402
-from app.logging_config import setup_logging  # noqa: E402
-from app.services.data_providers.demo import DemoProvider  # noqa: E402
-from app.services.market import ensure_pairs, upsert_bars, validate_pair_symbol  # noqa: E402
+from app.config import get_settings
+from app.db.engine import init_db, session_scope
+from app.logging_config import setup_logging
+from app.services.data_providers.demo import DemoProvider
+from app.services.market import ensure_pairs, upsert_bars, validate_pair_symbol
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument(
         "--pairs",
         type=str,
@@ -47,7 +49,9 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="RNG seed for the synthetic walk (default: DEMO_SEED).",
     )
-    parser.add_argument("--end", type=str, default=None, help="Last day (YYYY-MM-DD, default: today).")
+    parser.add_argument(
+        "--end", type=str, default=None, help="Last day (YYYY-MM-DD, default: today)."
+    )
     return parser.parse_args()
 
 
@@ -56,7 +60,11 @@ def main() -> int:
     settings = get_settings()
     setup_logging(settings.logs_dir, settings.log_level)
 
-    pairs = [validate_pair_symbol(p) for p in args.pairs.split(",")] if args.pairs else list(settings.pairs_list)
+    pairs = (
+        [validate_pair_symbol(p) for p in args.pairs.split(",")]
+        if args.pairs
+        else list(settings.pairs_list)
+    )
     days = args.days or settings.history_days
     seed = args.seed if args.seed is not None else settings.demo_seed
     end = date.fromisoformat(args.end) if args.end else date.today()
@@ -74,8 +82,10 @@ def main() -> int:
             total_inserted += inserted
             print(f"  {symbol}: fetched={len(bars)} inserted={inserted}")
 
-    print(f"\nSeeded demo data for {len(pairs)} pair(s), {total_inserted} new bars "
-          f"({start.isoformat()} .. {end.isoformat()}, seed={seed}).")
+    print(
+        f"\nSeeded demo data for {len(pairs)} pair(s), {total_inserted} new bars "
+        f"({start.isoformat()} .. {end.isoformat()}, seed={seed})."
+    )
     print("NOTE: this is synthetic DEMO data (is_demo=True), not real market data.")
     return 0
 

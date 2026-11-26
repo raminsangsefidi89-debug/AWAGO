@@ -6,7 +6,6 @@ import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
-from typing import List, Optional
 
 import httpx
 
@@ -28,7 +27,7 @@ class PriceBarData:
     high: float
     low: float
     close: float
-    volume: Optional[float] = None
+    volume: float | None = None
 
     @property
     def day(self) -> date:
@@ -46,19 +45,21 @@ class DataProvider(ABC):
     is_demo: bool = False
 
     @abstractmethod
-    def fetch_history(self, pair: str, start: date, end: date) -> List[PriceBarData]:
+    def fetch_history(self, pair: str, start: date, end: date) -> list[PriceBarData]:
         """Return daily bars for ``pair`` in [start, end] (inclusive)."""
 
-    def fetch_latest(self, pair: str) -> Optional[PriceBarData]:
+    def fetch_latest(self, pair: str) -> PriceBarData | None:
         """Return the most recent bar, or None. Default: use fetch_history."""
-        bars = self.fetch_history(pair, end=date.today(), start=date.fromordinal(date.today().toordinal() - 10))
+        bars = self.fetch_history(
+            pair, end=date.today(), start=date.fromordinal(date.today().toordinal() - 10)
+        )
         return bars[-1] if bars else None
 
 
 def http_get_with_retries(
     url: str,
     *,
-    params: Optional[dict] = None,
+    params: dict | None = None,
     timeout: float = 15.0,
     retries: int = 3,
 ) -> httpx.Response:
@@ -77,7 +78,7 @@ def http_get_with_retries(
         except httpx.HTTPError as exc:
             last_error = str(exc)
         if attempt < retries - 1:
-            wait = 2 ** attempt
+            wait = 2**attempt
             logger.warning("HTTP GET %s failed (%s), retrying in %ss", url, last_error, wait)
             time.sleep(wait)
     raise ProviderError(f"Request to {url} failed after {retries} attempts: {last_error}")

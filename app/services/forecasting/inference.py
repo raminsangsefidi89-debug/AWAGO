@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import math
 from datetime import timedelta
-from typing import Dict, Optional
 
 import pandas as pd
 from sqlalchemy import select
@@ -25,8 +24,8 @@ class ModelNotFoundError(RuntimeError):
 
 
 def find_artifact(
-    session: Session, pair_symbol: str, horizon: int, data_source: Optional[str] = None
-) -> Optional[ModelArtifact]:
+    session: Session, pair_symbol: str, horizon: int, data_source: str | None = None
+) -> ModelArtifact | None:
     stmt = select(ModelArtifact).where(
         ModelArtifact.pair_symbol == pair_symbol,
         ModelArtifact.horizon == horizon,
@@ -42,8 +41,8 @@ def forecast_pair(
     session: Session,
     pair_symbol: str,
     horizon: int,
-    settings: Optional[Settings] = None,
-) -> Dict:
+    settings: Settings | None = None,
+) -> dict:
     """Produce a point forecast with prediction interval for one pair/horizon.
 
     The model must have been trained beforehand (launcher/CLI/API job).

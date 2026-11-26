@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, Optional
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import get_settings
 from app.db.models import Base
 
-_engine: Optional[Engine] = None
-_session_factory: Optional[sessionmaker] = None
+_engine: Engine | None = None
+_session_factory: sessionmaker | None = None
 
 
 def _build_engine() -> Engine:
@@ -25,6 +25,7 @@ def _build_engine() -> Engine:
     engine = create_engine(url, **kwargs)
 
     if url.startswith("sqlite"):
+
         @event.listens_for(engine, "connect")
         def _set_sqlite_pragma(dbapi_connection, _record):  # pragma: no cover
             cursor = dbapi_connection.cursor()
@@ -52,9 +53,18 @@ def get_session_factory() -> sessionmaker:
 
 
 def init_db() -> None:
-    """Create all tables (idempotent, migrations-free)."""
-    engine = get_engine()
-    Base.metadata.create_all(engine)
+    """Bring the schema to the latest revision (idempotent, data-preserving).
+
+    Delegates to Alembic migrations (fresh DBs are created from migrations;
+    legacy v1 databases are stamped and upgraded). Falls back to
+    ``create_all`` if Alembic is unavailable for any reason.
+    """
+    try:
+        from app.db.migrations import run_migrations
+
+        run_migrations()
+    except Exception:
+        Base.metadata.create_all(get_engine())
 
 
 def reset_db_state() -> None:

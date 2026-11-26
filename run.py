@@ -217,6 +217,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-browser", action="store_true", help="Do not open the default browser.")
     parser.add_argument("--skip-seed", action="store_true", help="Never seed data automatically.")
     parser.add_argument("--skip-train", action="store_true", help="Never auto-train models.")
+    parser.add_argument(
+        "--profile",
+        choices=["lite", "full"],
+        default=None,
+        help="Model profile: 'lite' (default, fast) or 'full' (advanced models).",
+    )
     return parser.parse_args()
 
 
@@ -233,6 +239,8 @@ def main() -> int:
     ensure_env_file()
 
     args = parse_args()
+    if args.profile:
+        os.environ["PROFILE"] = args.profile
     from app.config import get_settings
 
     settings = get_settings()

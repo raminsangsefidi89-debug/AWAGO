@@ -89,3 +89,35 @@ The current bundled placeholders were produced by
 ### 10. `og-image.webp` (1200x630)
 
 > Cinematic wide composition of a futuristic currency analytics dashboard floating in space: glowing charts, forecast bands, and a faint globe made of data points, centered focal point with generous margins, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.
+
+---
+
+## v2 retry campaign outcome (2026-11-26)
+
+One retry campaign was run under the hard limit (10 generated images max,
+≤12 generation calls). **All 10/10 images generated successfully in 10
+calls.** The service that failed throughout v1 ("Image pricing is
+unavailable", 5 calls, 0 successes) was operational this campaign.
+
+| # | File | Outcome | Actual output | Final size | Notes |
+|---|---|---|---|---|---|
+| 1 | `hero-bg.webp` | ✅ generated | 1376×768 | 37 KB | webp q85 |
+| 2 | `logo-mark.png` | ✅ generated (post-processed) | model: 1408×768 RGB → cropped/resized 1024×1024 | 297 KB | Generator ignored the transparent-background prompt (RGB, no alpha); center-cropped, quantized to 128-color palette PNG to meet <300KB. Honest note: **no true alpha transparency**. |
+| 3 | `empty-state.webp` | ✅ generated | 1408×768 | 16 KB | webp q85 |
+| 4 | `error-state.webp` | ✅ generated | 1408×768 | 15 KB | webp q85 |
+| 5 | `training-state.webp` | ✅ generated | 1408×768 | 74 KB | webp q85 |
+| 6 | `demo-banner-bg.webp` | ✅ generated | 1408×768 | 108 KB | webp q85 |
+| 7 | `card-forecast.webp` | ✅ generated | 1408×768 | 29 KB | webp q85 |
+| 8 | `card-trend.webp` | ✅ generated | 1408×768 | 56 KB | webp q85 |
+| 9 | `card-evaluation.webp` | ✅ generated | 1408×768 | 35 KB | webp q85 |
+| 10 | `og-image.webp` | ✅ generated | 1584×672 | 70 KB | webp q85, near 1200×630 social ratio |
+
+Campaign stats: 10 calls used (budget ≤12), 0 retries needed, 0 failures.
+All prompts were used **verbatim** as recorded above (the shared style suffix
+was already part of each stored prompt). The image generator produces a
+fixed ~1408×768 (and ~1584×672 for wide prompts) canvas regardless of the
+requested dimensions — actual dimensions are recorded in
+`app/static/img/manifest.json` (`generated_dimensions`). Every final file is
+under 300 KB. SVG placeholders are kept in place; the dashboard's
+`onerror`/CSS fallback chain still upgrades `.webp` → `.svg` if a generated
+file is ever removed.

@@ -4,19 +4,46 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api import api_router
 from app.api.errors import AppError
-from app.config import BASE_DIR, get_settings
+from app.config import get_settings
 from app.db.engine import init_db
-from app.logging_config import get_logger, setup_logging
+from app.logging_config import get_logger, set_correlation_id, setup_logging
+
+
+class _RateLimiter:
+    """Tiny in-memory per-IP token bucket (protects a local API from loops)."""
+
+    def __init__(self, rate_per_minute: int = 300) -> None:
+        self.capacity = rate_per_minute
+        self.tokens: dict[str, float] = {}
+        self.last: dict[str, float] = {}
+
+    def allow(self, key: str) -> bool:
+        import time
+
+        now = time.monotonic()
+        tokens = self.tokens.get(key, float(self.capacity))
+        elapsed = now - self.last.get(key, now)
+        tokens = min(float(self.capacity), tokens + elapsed * (self.capacity / 60.0))
+        self.last[key] = now
+        if tokens < 1.0:
+            self.tokens[key] = tokens
+            return False
+        self.tokens[key] = tokens - 1.0
+        return True
+
+
+_rate_limiter = _RateLimiter()
 
 logger = get_logger(__name__)
 
@@ -31,8 +58,12 @@ async def lifespan(app: FastAPI):
     settings = get_settings()
     setup_logging(settings.logs_dir, settings.log_level)
     init_db()
-    logger.info("AWAGO started (data_mode=%s)", settings.data_mode)
+    from app.services.scheduler import start_scheduler_if_enabled, stop_scheduler
+
+    start_scheduler_if_enabled(settings)
+    logger.info("AWAGO started (data_mode=%s, profile=%s)", settings.data_mode, settings.profile)
     yield
+    stop_scheduler()
     logger.info("AWAGO shutting down")
 
 
@@ -52,6 +83,64 @@ def create_app() -> FastAPI:
         redoc_url="/redoc",
         openapi_url="/openapi.json",
     )
+
+    # ---------------- Correlation-id middleware -------------------------
+    @app.middleware("http")
+    async def _correlation_middleware(request: Request, call_next):
+        incoming = request.headers.get("x-request-id", "")
+        cid = set_correlation_id(incoming[:64] if incoming else None)
+        try:
+            response = await call_next(request)
+        except Exception:
+            logger.exception("Unhandled middleware-level error [%s]", cid)
+            raise
+        response.headers["X-Request-ID"] = cid
+        # ETag for buffered GET responses (never for streams like SSE).
+        content_type = response.headers.get("content-type", "")
+        if (
+            request.method == "GET"
+            and "/api/v1/" in request.url.path
+            and response.status_code == 200
+            and not content_type.startswith("text/event-stream")
+        ):
+            import hashlib
+
+            body = getattr(response, "body", None)
+            if not body and hasattr(response, "body_iterator"):
+                chunks = [chunk async for chunk in response.body_iterator]
+                body = b"".join(chunks)
+                rebuilt = Response(
+                    content=body,
+                    status_code=response.status_code,
+                    headers={
+                        k: v for k, v in response.headers.items() if k.lower() != "content-length"
+                    },
+                )
+                rebuilt.headers["X-Request-ID"] = cid
+                response = rebuilt
+            if body:
+                etag = '"' + hashlib.md5(body).hexdigest() + '"'
+                response.headers["ETag"] = etag
+                if request.headers.get("if-none-match") == etag:
+                    return Response(status_code=304, headers={"ETag": etag, "X-Request-ID": cid})
+        return response
+
+    # ---------------- Per-IP rate limiting (API only) --------------------
+    @app.middleware("http")
+    async def _rate_limit_middleware(request: Request, call_next):
+        if request.url.path.startswith("/api/"):
+            host = request.client.host if request.client else "unknown"
+            if not _rate_limiter.allow(host):
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "error": {
+                            "code": "rate_limited",
+                            "message": "Too many requests — slow down.",
+                        }
+                    },
+                )
+        return await call_next(request)
 
     # ---------------- Exception handlers (one consistent envelope) ----------
     @app.exception_handler(AppError)
@@ -75,7 +164,12 @@ def create_app() -> FastAPI:
 
     @app.exception_handler(StarletteHTTPException)
     async def _http_error_handler(_request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        code_map = {400: "bad_request", 403: "forbidden", 404: "not_found", 405: "method_not_allowed"}
+        code_map = {
+            400: "bad_request",
+            403: "forbidden",
+            404: "not_found",
+            405: "method_not_allowed",
+        }
         return JSONResponse(
             status_code=exc.status_code,
             content={
@@ -120,7 +214,8 @@ def create_app() -> FastAPI:
             return templates.TemplateResponse(request, "index.html", context)
         except TypeError:
             # Older Starlette: TemplateResponse(name, {"request": request, ...})
-            return templates.TemplateResponse("index.html", {"request": request, **context})
+            legacy_call: Any = templates.TemplateResponse
+            return legacy_call("index.html", {"request": request, **context})
 
     return app
 

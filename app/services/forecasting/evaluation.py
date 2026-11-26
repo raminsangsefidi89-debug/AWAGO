@@ -10,15 +10,14 @@ Rules enforced here:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
 
 import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
 
-
 # ----------------------------------------------------------------------
 # Metrics
 # ----------------------------------------------------------------------
+
 
 def mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     y_true = np.asarray(y_true, dtype=float)
@@ -57,7 +56,7 @@ def directional_accuracy(
     y_pred_price: np.ndarray,
     last_close: np.ndarray,
     eps: float = 1e-12,
-) -> Optional[float]:
+) -> float | None:
     """Share of samples where the predicted move direction matches the actual one.
 
     Returns None when no sample has a non-zero predicted move (e.g. the naive
@@ -76,6 +75,7 @@ def directional_accuracy(
 # Walk-forward evaluation
 # ----------------------------------------------------------------------
 
+
 @dataclass
 class WalkForwardResult:
     """Aggregated walk-forward predictions and metrics for one model/horizon."""
@@ -88,13 +88,13 @@ class WalkForwardResult:
     y_true_logret: np.ndarray
     y_pred_logret: np.ndarray
     test_indices: np.ndarray
-    fold_sizes: List[int] = field(default_factory=list)
+    fold_sizes: list[int] = field(default_factory=list)
 
     @property
     def residuals_logret(self) -> np.ndarray:
         return self.y_true_logret - self.y_pred_logret
 
-    def metrics(self) -> Dict:
+    def metrics(self) -> dict:
         return {
             "mae": mae(self.y_true_price, self.y_pred_price),
             "rmse": rmse(self.y_true_price, self.y_pred_price),
@@ -103,11 +103,11 @@ class WalkForwardResult:
             "directional_accuracy": directional_accuracy(
                 self.y_true_price, self.y_pred_price, self.last_close
             ),
-            "n_test": int(len(self.y_true_price)),
+            "n_test": len(self.y_true_price),
         }
 
 
-def walk_forward_indices(n_samples: int, n_splits: int = 5) -> List[tuple[np.ndarray, np.ndarray]]:
+def walk_forward_indices(n_samples: int, n_splits: int = 5) -> list[tuple[np.ndarray, np.ndarray]]:
     """Chronological (train, test) index pairs — expanding window."""
     # TimeSeriesSplit requires n_splits >= 2 and at least 3 samples.
     n_splits = max(2, min(n_splits, max(2, n_samples // 20)))
@@ -132,12 +132,12 @@ def walk_forward_evaluate(
     own scaler, fit on training folds only — no leakage).
     """
     n = len(X)
-    preds_logret: List[float] = []
-    trues_logret: List[float] = []
-    lasts: List[float] = []
-    trues_price: List[float] = []
-    indices: List[int] = []
-    fold_sizes: List[int] = []
+    preds_logret: list[float] = []
+    trues_logret: list[float] = []
+    lasts: list[float] = []
+    trues_price: list[float] = []
+    indices: list[int] = []
+    fold_sizes: list[int] = []
 
     for train_idx, test_idx in walk_forward_indices(n, n_splits):
         model = model_factory()
@@ -167,9 +167,7 @@ def walk_forward_evaluate(
     )
 
 
-def residual_quantiles(
-    residuals_logret: np.ndarray, level: float = 0.90
-) -> tuple[float, float]:
+def residual_quantiles(residuals_logret: np.ndarray, level: float = 0.90) -> tuple[float, float]:
     """Empirical quantiles of walk-forward residuals in return space.
 
     Returns (q_lo, q_hi) such that roughly ``level`` of residuals fall inside.

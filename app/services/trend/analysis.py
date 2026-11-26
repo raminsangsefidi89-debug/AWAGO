@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Dict, List
-
 import numpy as np
 import pandas as pd
 
@@ -13,7 +11,7 @@ from app.services.features.indicators import atr, ema, log_returns, rolling_vola
 SIDEWAYS_SLOPE_THRESHOLD = 2e-4
 
 
-def analyze_trend(df: pd.DataFrame, lookback: int = 30) -> Dict:
+def analyze_trend(df: pd.DataFrame, lookback: int = 30) -> dict:
     """Analyse the trend of an OHLC frame using the last ``lookback`` bars.
 
     Returns a JSON-safe dict with direction, strength (0-100), slope,
@@ -32,7 +30,7 @@ def analyze_trend(df: pd.DataFrame, lookback: int = 30) -> Dict:
     fitted = slope * x + intercept
     resid = log_window - fitted
     ss_tot = float(np.sum((log_window - log_window.mean()) ** 2))
-    ss_res = float(np.sum(resid ** 2))
+    ss_res = float(np.sum(resid**2))
     r_squared = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
     if slope > SIDEWAYS_SLOPE_THRESHOLD:
@@ -48,7 +46,11 @@ def analyze_trend(df: pd.DataFrame, lookback: int = 30) -> Dict:
     strength = float(round(100.0 * max(0.0, r_squared) * slope_score, 1))
 
     rets = log_returns(close)
-    vol_20 = float(rolling_volatility(rets, min(20, len(rets))).iloc[-1]) if len(rets) >= 2 else float("nan")
+    vol_20 = (
+        float(rolling_volatility(rets, min(20, len(rets))).iloc[-1])
+        if len(rets) >= 2
+        else float("nan")
+    )
     vol_hist = rolling_volatility(rets, min(60, len(rets))).dropna()
     if not vol_hist.empty and vol_20 == vol_20:  # not NaN
         percentile = float((vol_hist < vol_20).mean())

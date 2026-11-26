@@ -22,18 +22,26 @@ from common import bootstrap
 
 bootstrap()
 
-from app.config import get_settings  # noqa: E402
-from app.db.engine import init_db, session_scope  # noqa: E402
-from app.logging_config import setup_logging  # noqa: E402
-from app.services.market import collect_data, validate_pair_symbol  # noqa: E402
+from app.config import get_settings
+from app.db.engine import init_db, session_scope
+from app.logging_config import setup_logging
+from app.services.market import collect_data, validate_pair_symbol
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--pairs", type=str, default=None, help="Comma-separated pairs (default: all).")
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    parser.add_argument(
+        "--pairs", type=str, default=None, help="Comma-separated pairs (default: all)."
+    )
     parser.add_argument("--start", type=str, default=None, help="Start date YYYY-MM-DD.")
-    parser.add_argument("--end", type=str, default=None, help="End date YYYY-MM-DD (default: today).")
-    parser.add_argument("--days", type=int, default=None, help="Look-back window in days (default: HISTORY_DAYS).")
+    parser.add_argument(
+        "--end", type=str, default=None, help="End date YYYY-MM-DD (default: today)."
+    )
+    parser.add_argument(
+        "--days", type=int, default=None, help="Look-back window in days (default: HISTORY_DAYS)."
+    )
     return parser.parse_args()
 
 
@@ -53,15 +61,17 @@ def main() -> int:
     try:
         with session_scope() as session:
             summary = collect_data(session, settings, pairs=pairs, start=start, end=end)
-    except Exception as exc:  # noqa: BLE001 — CLI-friendly error
+    except Exception as exc:
         print(f"ERROR: data collection failed: {exc}")
         print("Hint: set DATA_MODE=demo (or FALLBACK_TO_DEMO=true) in .env to work offline.")
         return 1
 
     print(json.dumps(summary, indent=2))
     if summary.get("fallback_used"):
-        print("\nWARNING: the real data source was unreachable; DEMO data was stored instead "
-              "(clearly flagged with is_demo=True).")
+        print(
+            "\nWARNING: the real data source was unreachable; DEMO data was stored instead "
+            "(clearly flagged with is_demo=True)."
+        )
     return 0
 
 

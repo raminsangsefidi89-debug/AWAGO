@@ -7,10 +7,10 @@ from app.services.data_providers.frankfurter import FrankfurterProvider
 
 __all__ = [
     "DataProvider",
+    "DemoProvider",
+    "FallbackProvider",
+    "FrankfurterProvider",
     "PriceBarData",
     "ProviderError",
-    "DemoProvider",
-    "FrankfurterProvider",
-    "FallbackProvider",
     "get_provider",
 ]

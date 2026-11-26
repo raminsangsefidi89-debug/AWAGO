@@ -38,7 +38,9 @@ def _artifact_info(a: ModelArtifact) -> ModelArtifactInfo:
 def list_models(db: Session = Depends(get_db)) -> ModelListResponse:
     """List metadata for every persisted model (pair, horizon, training window, metrics)."""
     rows = list(
-        db.scalars(select(ModelArtifact).order_by(ModelArtifact.pair_symbol, ModelArtifact.horizon)).all()
+        db.scalars(
+            select(ModelArtifact).order_by(ModelArtifact.pair_symbol, ModelArtifact.horizon)
+        ).all()
     )
     return ModelListResponse(
         models=[_artifact_info(a) for a in rows],
@@ -78,7 +80,9 @@ def list_models_for_pair(pair: str, db: Session = Depends(get_db)) -> ModelListR
     summary="Trained models for one pair (BASE/QUOTE)",
     include_in_schema=False,
 )
-def list_models_for_pair_split(base: str, quote: str, db: Session = Depends(get_db)) -> ModelListResponse:
+def list_models_for_pair_split(
+    base: str, quote: str, db: Session = Depends(get_db)
+) -> ModelListResponse:
     return _models_for_pair(normalize_pair(f"{base}/{quote}"), db)
 
 

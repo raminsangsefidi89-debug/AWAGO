@@ -41,7 +41,7 @@ class CurrencyPair(Base):
     sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
-    bars: Mapped[list["PriceBar"]] = relationship(back_populates="pair", cascade="all, delete-orphan")
+    bars: Mapped[list[PriceBar]] = relationship(back_populates="pair", cascade="all, delete-orphan")
 
 
 class PriceBar(Base):
@@ -53,12 +53,16 @@ class PriceBar(Base):
 
     __tablename__ = "price_bars"
     __table_args__ = (
-        UniqueConstraint("pair_symbol", "timestamp", "interval", "data_source", name="uq_bar_identity"),
+        UniqueConstraint(
+            "pair_symbol", "timestamp", "interval", "data_source", name="uq_bar_identity"
+        ),
         Index("ix_price_bars_pair_ts", "pair_symbol", "timestamp"),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    pair_symbol: Mapped[str] = mapped_column(String(16), ForeignKey("currency_pairs.symbol"), nullable=False)
+    pair_symbol: Mapped[str] = mapped_column(
+        String(16), ForeignKey("currency_pairs.symbol"), nullable=False
+    )
     timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     interval: Mapped[str] = mapped_column(String(8), nullable=False, default="1d")
     open: Mapped[float] = mapped_column(Float, nullable=False)
@@ -68,6 +72,9 @@ class PriceBar(Base):
     volume: Mapped[float | None] = mapped_column(Float, nullable=True)
     data_source: Mapped[str] = mapped_column(String(32), nullable=False, default="demo")
     is_demo: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    fetched_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    dataset_version: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+    quality_flag: Mapped[str] = mapped_column(String(16), nullable=False, default="ok")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     pair: Mapped[CurrencyPair] = relationship(back_populates="bars")
@@ -78,7 +85,9 @@ class ModelArtifact(Base):
 
     __tablename__ = "model_artifacts"
     __table_args__ = (
-        UniqueConstraint("pair_symbol", "horizon", "model_name", "data_source", name="uq_model_identity"),
+        UniqueConstraint(
+            "pair_symbol", "horizon", "model_name", "data_source", name="uq_model_identity"
+        ),
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -134,3 +143,20 @@ class JobRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    cancel_requested: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    correlation_id: Mapped[str] = mapped_column(String(64), nullable=False, default="")
+
+
+class QualityReport(Base):
+    """Stored data-quality report for one (pair, data_source) series."""
+
+    __tablename__ = "quality_reports"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    pair_symbol: Mapped[str] = mapped_column(String(16), nullable=False)
+    data_source: Mapped[str] = mapped_column(String(32), nullable=False)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    schema_version: Mapped[str] = mapped_column(String(8), nullable=False, default="1")
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="clean")
+    issue_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    report_json: Mapped[str] = mapped_column(Text, nullable=False, default="{}")

@@ -11,7 +11,6 @@ from app.services.forecasting.training import lightgbm_available, train_pair
 
 
 def test_quick_training_creates_artifacts_and_honest_metrics(trained_db, app_env):
-    settings = app_env
     with session_scope() as session:
         artifacts = [a for a in session.query(ModelArtifact).all() if a.pair_symbol == "EUR/USD"]
         assert len(artifacts) >= 1
@@ -55,7 +54,6 @@ def test_training_fails_cleanly_without_enough_data(seeded_db, app_env):
 
     with session_scope() as session:
         upsert_bars(session, "EUR/GBP", [], data_source="demo")  # ensure pair exists implicitly
-    with pytest.raises((ValueError, Exception)) as excinfo:
-        with session_scope() as session:
-            train_pair(session, "EUR/GBP", horizons=[1], settings=app_env, quick=True)
+    with pytest.raises((ValueError, Exception)) as excinfo, session_scope() as session:
+        train_pair(session, "EUR/GBP", horizons=[1], settings=app_env, quick=True)
     assert "bars" in str(excinfo.value).lower() or "train" in str(excinfo.value).lower()

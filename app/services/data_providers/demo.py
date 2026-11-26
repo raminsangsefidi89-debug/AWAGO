@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import zlib
 from datetime import date, timedelta
-from typing import Dict, List, Tuple
 
 import numpy as np
 
@@ -22,11 +21,12 @@ from app.services.data_providers.base import (
     PriceBarData,
     to_utc_midnight,
 )
+from app.services.data_providers.capabilities import ProviderCapabilities
 
 EPOCH = date(2015, 1, 1)  # fixed generation start -> stable history over time
 
 # Realistic starting levels and per-pair volatility/drift for the synthetic walk.
-PAIR_PROFILES: Dict[str, Tuple[float, float, float]] = {
+PAIR_PROFILES: dict[str, tuple[float, float, float]] = {
     # symbol: (start_price, daily_vol, annual_drift)
     "EUR/USD": (1.1000, 0.0052, 0.00),
     "GBP/USD": (1.2700, 0.0056, -0.01),
@@ -62,6 +62,19 @@ class DemoProvider(DataProvider):
     name = "demo"
     is_demo = True
 
+    capabilities = ProviderCapabilities(
+        name="demo",
+        pairs=("*",),
+        intervals=("1d",),
+        history_depth_days=None,
+        rate_limit_per_minute=None,
+        latency_typical_ms=1,
+        license_notes="Synthetic data generated locally (fixed seed); not real market data.",
+        requires_key=False,
+        verified_live=True,
+        is_demo=True,
+    )
+
     def __init__(self, seed: int = 42) -> None:
         self.seed = seed
 
@@ -72,21 +85,25 @@ class DemoProvider(DataProvider):
         rng = np.random.default_rng(_pair_seed(self.seed, pair))
 
         daily_drift = annual_drift / 252.0
-        long_run_var = daily_vol ** 2
+        long_run_var = daily_vol**2
         omega = GARCH_LONG_RUN_FRAC * (1 - GARCH_ALPHA - GARCH_BETA) * long_run_var
 
         z = rng.standard_normal(n_days)
         log_returns = np.empty(n_days)
         sigma2 = long_run_var
         for t in range(n_days):
-            sigma2 = omega + GARCH_ALPHA * (log_returns[t - 1] ** 2 if t > 0 else long_run_var) + GARCH_BETA * sigma2
+            sigma2 = (
+                omega
+                + GARCH_ALPHA * (log_returns[t - 1] ** 2 if t > 0 else long_run_var)
+                + GARCH_BETA * sigma2
+            )
             sigma2 = max(sigma2, 1e-12)
             log_returns[t] = daily_drift + np.sqrt(sigma2) * z[t]
 
         closes = start_price * np.exp(np.cumsum(log_returns))
         return closes
 
-    def _generate_series(self, pair: str, start: date, end: date) -> List[PriceBarData]:
+    def _generate_series(self, pair: str, start: date, end: date) -> list[PriceBarData]:
         if end < start:
             return []
         n_days = (end - EPOCH).days + 1
@@ -95,7 +112,7 @@ class DemoProvider(DataProvider):
         closes = self._generate_closes(pair, n_days)
         rng = np.random.default_rng(_pair_seed(self.seed + 7, pair))
 
-        bars: List[PriceBarData] = []
+        bars: list[PriceBarData] = []
         prev_close = float(closes[0])
         for i in range(n_days):
             current_day = EPOCH + timedelta(days=i)
@@ -126,7 +143,7 @@ class DemoProvider(DataProvider):
         return bars
 
     # ------------------------------------------------------------------
-    def fetch_history(self, pair: str, start: date, end: date) -> List[PriceBarData]:
+    def fetch_history(self, pair: str, start: date, end: date) -> list[PriceBarData]:
         pair = pair.upper()
         return self._generate_series(pair, start, end)
 

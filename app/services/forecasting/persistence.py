@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import joblib
 
@@ -22,7 +22,7 @@ def model_path(models_dir: Path, pair_symbol: str, horizon: int, model_name: str
     return d / f"h{horizon}_{model_name}.joblib"
 
 
-def save_bundle(path: Path, bundle: Dict[str, Any]) -> str:
+def save_bundle(path: Path, bundle: dict[str, Any]) -> str:
     """Persist a model bundle; returns the absolute path as a string."""
     path.parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(bundle, path)
@@ -30,7 +30,7 @@ def save_bundle(path: Path, bundle: Dict[str, Any]) -> str:
     return str(path.resolve())
 
 
-def load_bundle(path: str | Path) -> Dict[str, Any]:
+def load_bundle(path: str | Path) -> dict[str, Any]:
     """Load a model bundle previously saved with :func:`save_bundle`."""
     p = Path(path)
     if not p.exists():
