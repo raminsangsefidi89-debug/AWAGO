@@ -9,7 +9,6 @@ Each endpoint is registered in two shapes so that the natural pair form
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
@@ -40,6 +39,7 @@ VALID_INTERVALS = {"1d"}
 # Pairs
 # ------------------------------------------------------------------
 
+
 @router.get("/pairs", response_model=PairListResponse, summary="Available currency pairs")
 def list_pairs(db: Session = Depends(get_db)) -> PairListResponse:
     """List all active currency pairs with their latest price and data source."""
@@ -64,6 +64,7 @@ def list_pairs(db: Session = Depends(get_db)) -> PairListResponse:
 # ------------------------------------------------------------------
 # Current price
 # ------------------------------------------------------------------
+
 
 def _price_response(symbol: str, db: Session) -> PriceResponse:
     pair_or_404(db, symbol)
@@ -110,12 +111,13 @@ def current_price_split(base: str, quote: str, db: Session = Depends(get_db)) ->
 # History
 # ------------------------------------------------------------------
 
+
 def _history_response(
     symbol: str,
     db: Session,
     interval: str,
-    start: Optional[datetime],
-    end: Optional[datetime],
+    start: datetime | None,
+    end: datetime | None,
     limit: int,
 ) -> HistoryResponse:
     pair_or_404(db, symbol)
@@ -149,12 +151,14 @@ def _history_response(
     )
 
 
-@router.get("/pairs/{pair}/history", response_model=HistoryResponse, summary="Historical prices (slug)")
+@router.get(
+    "/pairs/{pair}/history", response_model=HistoryResponse, summary="Historical prices (slug)"
+)
 def history(
     pair: str,
     interval: str = Query("1d", description="Bar interval. Only '1d' (daily) is supported."),
-    start: Optional[datetime] = Query(None, description="Inclusive start date (ISO)."),
-    end: Optional[datetime] = Query(None, description="Inclusive end date (ISO)."),
+    start: datetime | None = Query(None, description="Inclusive start date (ISO)."),
+    end: datetime | None = Query(None, description="Inclusive end date (ISO)."),
     limit: int = Query(500, ge=1, le=5000, description="Maximum number of bars returned."),
     db: Session = Depends(get_db),
 ) -> HistoryResponse:
@@ -172,8 +176,8 @@ def history_split(
     base: str,
     quote: str,
     interval: str = Query("1d"),
-    start: Optional[datetime] = Query(None),
-    end: Optional[datetime] = Query(None),
+    start: datetime | None = Query(None),
+    end: datetime | None = Query(None),
     limit: int = Query(500, ge=1, le=5000),
     db: Session = Depends(get_db),
 ) -> HistoryResponse:

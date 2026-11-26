@@ -1,0 +1,8 @@
+# Optional heavy ML/analytics dependencies (profile: full).
+# The app runs without these — they are auto-detected and gracefully skipped
+# (lite profile). Install with:  pip install -r requirements-ml.txt
+-r requirements.txt
+lightgbm>=4.0
+statsmodels>=0.14
+scipy>=1.11
+duckdb>=1.0

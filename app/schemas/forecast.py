@@ -2,21 +2,23 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 
 class ModelInfo(BaseModel):
-    model_name: str = Field(..., description="Winning algorithm, e.g. 'ridge', 'hist_gb', 'lightgbm'.")
-    trained_at: Optional[str] = None
-    features_version: Optional[str] = None
-    n_training_rows: Optional[int] = None
-    beats_baseline: Optional[bool] = Field(
+    model_name: str = Field(
+        ..., description="Winning algorithm, e.g. 'ridge', 'hist_gb', 'lightgbm'."
+    )
+    trained_at: str | None = None
+    features_version: str | None = None
+    n_training_rows: int | None = None
+    beats_baseline: bool | None = Field(
         None, description="True only when walk-forward MAE beats the naive baseline."
     )
-    mae: Optional[float] = None
-    smape: Optional[float] = None
+    mae: float | None = None
+    smape: float | None = None
 
 
 class ForecastResponse(BaseModel):
@@ -43,12 +45,12 @@ class ForecastResponse(BaseModel):
 class TrendResponse(BaseModel):
     direction: str = Field(..., description="'up' | 'down' | 'sideways'.")
     strength: float = Field(..., description="0-100 trend strength score.")
-    slope_per_day: Optional[float] = None
-    r_squared: Optional[float] = None
+    slope_per_day: float | None = None
+    r_squared: float | None = None
     lookback_bars: int
     volatility_regime: str = Field(..., description="'low' | 'medium' | 'high'.")
-    volatility_percentile: Optional[float] = None
-    indicators: Dict[str, Any]
+    volatility_percentile: float | None = None
+    indicators: dict[str, Any]
 
 
 class IndicatorResponse(BaseModel):

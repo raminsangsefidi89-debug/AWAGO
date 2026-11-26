@@ -6,10 +6,12 @@
       "dimensions": "1920x800",
       "purpose": "Dashboard header/hero background behind a dark gradient overlay.",
       "prompt": "Wide abstract banner background representing global currency markets: flowing luminous candlestick-like bars and smooth glowing price curves over a faint world-grid, depth of field, calm and professional, leave the center-right area relatively empty for overlay text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1376x768 (requested 1920x800). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1376x768",
+      "bytes": 37410
     },
     {
       "filename": "logo-mark.png",
@@ -18,9 +20,11 @@
       "purpose": "AWAGO emblem in the header, favicon source (32x32 and 180x180 exports).",
       "prompt": "Minimal abstract emblem for a forecasting platform: a stylized upward-curving arrow blended with a wave and a subtle compass-like ring, geometric, symmetrical, teal and gold gradient on a transparent background, flat vector look, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
       "generation_date": "2026-11-26",
-      "status": "fallback-placeholder-png",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim. The generator returned a 1408x768 RGB image without alpha despite the transparent-background prompt; center-cropped, resized to 1024x1024 and quantized (128-color palette PNG, 297KB, <300KB). Honest note: no true alpha transparency.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1024x1024",
+      "bytes": 296638
     },
     {
       "filename": "empty-state.webp",
@@ -28,10 +32,12 @@
       "dimensions": "800x600",
       "purpose": "Shown when no data is available for the selected pair/range.",
       "prompt": "Illustration of an empty chart panel: a clean dashboard frame with a faint dotted baseline and a small magnifying glass hovering over blank space, soft glow, friendly and calm mood. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 800x600). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 15624
     },
     {
       "filename": "error-state.webp",
@@ -39,10 +45,12 @@
       "dimensions": "800x600",
       "purpose": "Shown on API/network errors.",
       "prompt": "Illustration of a disconnected data link: two glowing nodes with a gently broken connecting line and small sparks, a subtle warning-amber accent, calm rather than alarming, tidy composition. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 800x600). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 14804
     },
     {
       "filename": "training-state.webp",
@@ -50,10 +58,12 @@
       "dimensions": "800x600",
       "purpose": "Shown while a model training or data collection job is running.",
       "prompt": "Illustration of a machine-learning model being trained: layered translucent neural-network nodes connected by glowing lines feeding into a rising line chart, sense of motion and progress. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 800x600). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 73998
     },
     {
       "filename": "demo-banner-bg.webp",
@@ -61,10 +71,12 @@
       "dimensions": "1600x300",
       "purpose": "Background of the prominent Demo-data banner, under a semi-transparent overlay.",
       "prompt": "Wide thin strip pattern in amber and navy: diagonal soft hatching with faint broken chart lines, indicating a simulated environment, subtle, low contrast, seamless feel. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 1600x300). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 108440
     },
     {
       "filename": "card-forecast.webp",
@@ -72,10 +84,12 @@
       "dimensions": "640x400",
       "purpose": "Illustration for the forecast feature card.",
       "prompt": "A smooth price line that continues into the future as a dashed glowing path, surrounded by a translucent widening cone representing uncertainty, on a dark grid. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 640x400). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 29120
     },
     {
       "filename": "card-trend.webp",
@@ -83,10 +97,12 @@
       "dimensions": "640x400",
       "purpose": "Illustration for the trend-analysis feature card.",
       "prompt": "A noisy price series with a clean bright trend line cutting through it and a subtle directional arrow, layered moving-average ribbons in teal and gold, dark grid. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 640x400). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 55896
     },
     {
       "filename": "card-evaluation.webp",
@@ -94,10 +110,12 @@
       "dimensions": "640x400",
       "purpose": "Illustration for the model-evaluation feature card.",
       "prompt": "Two competing glowing curves, one labeled-by-color as the model and one as the baseline, with a magnified comparison zone and a small balance-scale motif, dark grid, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1408x768 (requested 640x400). SVG placeholder kept as fallback.",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1408x768",
+      "bytes": 35216
     },
     {
       "filename": "og-image.webp",
@@ -105,12 +123,22 @@
       "dimensions": "1200x630",
       "purpose": "Social preview (Open Graph / Twitter card) referenced in the HTML head.",
       "prompt": "Cinematic wide composition of a futuristic currency analytics dashboard floating in space: glowing charts, forecast bands, and a faint globe made of data points, centered focal point with generous margins, no text. Cohesive visual style: modern fintech aesthetic, deep navy and midnight blue base (#0B1220 to #14213D), teal (#2DD4BF) and warm gold (#F5B942) accents, soft glow, subtle grid and data-line motifs, clean vector-like 3D-flat illustration, high-end, minimal, lots of negative space, no text, no letters, no numbers, no watermark, no logos, no people.",
-      "generation_date": null,
-      "status": "fallback-placeholder",
-      "note": "Image generation was unavailable in the build environment (see docs/IMAGE_PROMPTS.md). The dashboard loads the .webp/.png file first and falls back to the SVG placeholder automatically.",
-      "recorded_on": "2026-11-26"
+      "generation_date": "2026-11-26",
+      "status": "generated",
+      "note": "Generated in the v2 retry campaign (2026-11-26): prompt used verbatim, 10/10 succeeded in 10 calls. Converted to webp q85 (<300KB); actual generated size 1584x672 (requested 1200x630). SVG placeholder kept as fallback. (native output 1584x672, close to the 1200x630 social ratio).",
+      "recorded_on": "2026-11-26",
+      "generated_dimensions": "1584x672",
+      "bytes": 69576
     }
   ],
   "image_limit": 10,
-  "generated_count": 0
+  "generated_count": 0,
+  "campaign": {
+    "date": "2026-11-26",
+    "calls_used": 10,
+    "call_budget": 12,
+    "images_generated": 10,
+    "images_total": 10,
+    "failures": 0
+  }
 }

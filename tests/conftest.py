@@ -93,3 +93,19 @@ def client(trained_db):
     app = create_app()
     with TestClient(app) as test_client:
         yield test_client
+
+
+@pytest.fixture()
+def tmp_session(tmp_path):
+    """Isolated in-memory-style SQLite session for unit tests."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    from app.db.models import Base
+
+    engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'unit.db'}")
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine)()
+    yield session
+    session.close()
+    engine.dispose()

@@ -17,7 +17,6 @@ degrades to a smoothed close-to-close range. Weekends/holidays are absent.
 from __future__ import annotations
 
 from datetime import date
-from typing import List
 
 from app.logging_config import get_logger
 from app.services.data_providers.base import (
@@ -27,6 +26,7 @@ from app.services.data_providers.base import (
     http_get_with_retries,
     to_utc_midnight,
 )
+from app.services.data_providers.capabilities import ProviderCapabilities
 
 logger = get_logger(__name__)
 
@@ -36,6 +36,22 @@ class FrankfurterProvider(DataProvider):
 
     name = "frankfurter"
     is_demo = False
+
+    capabilities = ProviderCapabilities(
+        name="frankfurter",
+        pairs=("*",),
+        intervals=("1d",),
+        history_depth_days=None,  # ECB reference rates: 1999-present for EUR crosses
+        rate_limit_per_minute=60,
+        latency_typical_ms=300,
+        license_notes=(
+            "Frankfurter (frankfurter.dev) serves ECB reference rates; free, no key. "
+            "Verify current terms at frankfurter.dev."
+        ),
+        requires_key=False,
+        verified_live=False,  # no outbound access from the build environment
+        is_demo=False,
+    )
 
     def __init__(
         self,
@@ -54,7 +70,7 @@ class FrankfurterProvider(DataProvider):
             raise ProviderError(f"Invalid pair symbol: {pair!r} (expected BASE/QUOTE)")
         return parts[0], parts[1]
 
-    def fetch_history(self, pair: str, start: date, end: date) -> List[PriceBarData]:
+    def fetch_history(self, pair: str, start: date, end: date) -> list[PriceBarData]:
         base, quote = self._split_pair(pair)
         if end < start:
             return []
@@ -75,7 +91,7 @@ class FrankfurterProvider(DataProvider):
             raise ProviderError(f"Frankfurter returned invalid JSON for {pair}") from exc
 
         rates = payload.get("rates") or {}
-        bars: List[PriceBarData] = []
+        bars: list[PriceBarData] = []
         for day_str, quote_map in sorted(rates.items()):
             if quote not in quote_map:
                 continue

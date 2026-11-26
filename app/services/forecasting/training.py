@@ -9,8 +9,9 @@ Training is NEVER triggered automatically by server startup. It runs from:
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -47,10 +48,9 @@ MIN_ROWS_QUICK = 150
 # Candidate models (scalers are inside pipelines -> fit on train folds only)
 # ----------------------------------------------------------------------
 
+
 def _make_ridge() -> Pipeline:
-    return Pipeline(
-        [("scaler", StandardScaler()), ("model", Ridge(alpha=1.0, random_state=None))]
-    )
+    return Pipeline([("scaler", StandardScaler()), ("model", Ridge(alpha=1.0, random_state=None))])
 
 
 def _make_hist_gb():
@@ -111,12 +111,12 @@ def lightgbm_available() -> bool:
         import lightgbm  # noqa: F401
 
         return True
-    except Exception:  # noqa: BLE001
+    except Exception:
         return False
 
 
-def candidate_factories(quick: bool = False) -> Dict[str, Callable[[], object]]:
-    factories: Dict[str, Callable[[], object]] = {
+def candidate_factories(quick: bool = False) -> dict[str, Callable[[], Any]]:
+    factories: dict[str, Callable[[], object]] = {
         "ridge": _make_ridge,
         "hist_gb": _make_hist_gb_quick if quick else _make_hist_gb,
     }
@@ -131,9 +131,10 @@ def candidate_factories(quick: bool = False) -> Dict[str, Callable[[], object]]:
 # Training
 # ----------------------------------------------------------------------
 
+
 def _compute_baseline_logret_preds(
     frame: pd.DataFrame, mask: np.ndarray, horizon: int
-) -> Dict[str, np.ndarray]:
+) -> dict[str, np.ndarray]:
     """Baseline predictions in return space for the masked rows.
 
     naive: 0.0 (price unchanged). drift: mean log-return of the trailing
@@ -149,11 +150,11 @@ def _compute_baseline_logret_preds(
 def train_pair(
     session,
     pair_symbol: str,
-    horizons: Optional[List[int]] = None,
-    settings: Optional[Settings] = None,
+    horizons: list[int] | None = None,
+    settings: Settings | None = None,
     quick: bool = False,
-    progress: Optional[ProgressCallback] = None,
-) -> Dict:
+    progress: ProgressCallback | None = None,
+) -> dict:
     """Train and persist models for one pair across the given horizons.
 
     Returns a summary dict. Every candidate is compared to the naive
@@ -193,7 +194,11 @@ def train_pair(
     n_splits = 3 if quick else 5
     interval_level = settings.prediction_interval_level
 
-    results: Dict[str, Dict] = {"pair_symbol": pair_symbol, "data_source": data_source, "horizons": {}}
+    results: dict[str, Any] = {
+        "pair_symbol": pair_symbol,
+        "data_source": data_source,
+        "horizons": {},
+    }
 
     for hi, h in enumerate(horizons):
         base_frac = 0.10 + 0.85 * (hi / max(1, len(horizons)))
@@ -218,7 +223,7 @@ def train_pair(
 
         # --- baselines on identical test rows ---
         baseline_preds = _compute_baseline_logret_preds(frame, mask, h)
-        baseline_metrics: Dict[str, Dict] = {}
+        baseline_metrics: dict[str, dict] = {}
         for bname, bpred_logret in baseline_preds.items():
             b_pred_price = close_t * np.exp(bpred_logret)
             baseline_metrics[bname] = {
@@ -229,14 +234,14 @@ def train_pair(
                 "directional_accuracy": directional_accuracy(
                     close_th[test_idx], b_pred_price[test_idx], close_t[test_idx]
                 ),
-                "n_test": int(len(test_idx)),
+                "n_test": len(test_idx),
             }
 
         naive_mae = baseline_metrics["naive"]["mae"]
         naive_rmse = baseline_metrics["naive"]["rmse"]
 
         # --- candidates ---
-        candidate_results: Dict[str, Dict] = {}
+        candidate_results: dict[str, dict] = {}
         wf_results = {}
         factories = candidate_factories(quick=quick)
         for ci, (name, factory) in enumerate(factories.items()):
@@ -252,7 +257,9 @@ def train_pair(
             met = wf.metrics()
             met["beats_baseline"] = bool(met["mae"] < naive_mae)
             met["mae_ratio_vs_naive"] = round(met["mae"] / naive_mae, 4) if naive_mae > 0 else None
-            met["rmse_ratio_vs_naive"] = round(met["rmse"] / naive_rmse, 4) if naive_rmse > 0 else None
+            met["rmse_ratio_vs_naive"] = (
+                round(met["rmse"] / naive_rmse, 4) if naive_rmse > 0 else None
+            )
             candidate_results[name] = met
 
         if not candidate_results:
@@ -292,7 +299,7 @@ def train_pair(
         saved = save_bundle(path, bundle)
 
         # --- DB records (replace previous artifacts for identity) ---
-        from sqlalchemy import delete, select
+        from sqlalchemy import delete
 
         session.execute(
             delete(ModelArtifact).where(
@@ -349,7 +356,11 @@ def train_pair(
                     evaluated_at=trained_at,
                     data_source=data_source,
                     details_json=json.dumps(
-                        {k: v for k, v in met.items() if k not in ("mae", "rmse", "smape", "directional_accuracy", "n_test")}
+                        {
+                            k: v
+                            for k, v in met.items()
+                            if k not in ("mae", "rmse", "smape", "directional_accuracy", "n_test")
+                        }
                     ),
                 )
             )

@@ -62,7 +62,9 @@ def build_feature_frame(df: pd.DataFrame, horizons: list[int]) -> pd.DataFrame:
     Rows keep NaN targets at the end of the series (used for inference).
     """
     df = df.sort_values("timestamp").reset_index(drop=True).copy()
-    base = pd.DataFrame({"timestamp": pd.to_datetime(df["timestamp"], utc=True), "close": df["close"].astype(float)})
+    base = pd.DataFrame(
+        {"timestamp": pd.to_datetime(df["timestamp"], utc=True), "close": df["close"].astype(float)}
+    )
 
     indicators = compute_indicator_frame(df)
     calendar = add_calendar_features(base)

@@ -6,10 +6,10 @@ from app.db.models import Base, CurrencyPair, JobRecord, MetricRecord, ModelArti
 __all__ = [
     "Base",
     "CurrencyPair",
-    "PriceBar",
-    "ModelArtifact",
-    "MetricRecord",
     "JobRecord",
+    "MetricRecord",
+    "ModelArtifact",
+    "PriceBar",
     "get_db",
     "get_engine",
     "get_session_factory",

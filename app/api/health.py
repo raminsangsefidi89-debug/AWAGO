@@ -17,7 +17,9 @@ router = APIRouter(tags=["health"])
 
 
 @router.get("/health", response_model=HealthResponse, summary="Service health and data status")
-def health(db: Session = Depends(get_db), settings: Settings = Depends(get_settings)) -> HealthResponse:
+def health(
+    db: Session = Depends(get_db), settings: Settings = Depends(get_settings)
+) -> HealthResponse:
     """Report service status, configured data mode, DB connectivity and latest data timestamp."""
     db_status = "connected"
     bar_count = 0
@@ -30,12 +32,14 @@ def health(db: Session = Depends(get_db), settings: Settings = Depends(get_setti
         pair_count = int(db.scalar(select(func.count(CurrencyPair.id))) or 0)
         bar_count = int(db.scalar(select(func.count(PriceBar.id))) or 0)
         row = db.execute(
-            select(PriceBar.timestamp, PriceBar.data_source).order_by(PriceBar.timestamp.desc()).limit(1)
+            select(PriceBar.timestamp, PriceBar.data_source)
+            .order_by(PriceBar.timestamp.desc())
+            .limit(1)
         ).first()
         if row is not None:
             latest_ts = row[0].isoformat() if row[0] else None
             latest_source = row[1]
-    except Exception:  # noqa: BLE001
+    except Exception:
         db_status = "error"
 
     return HealthResponse(

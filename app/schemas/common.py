@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -12,7 +12,9 @@ class ErrorBody(BaseModel):
 
     code: str = Field(..., description="Machine-readable error code, e.g. 'pair_not_found'.")
     message: str = Field(..., description="Clear, human-readable explanation.")
-    details: Optional[Any] = Field(None, description="Optional structured details (e.g. validation errors).")
+    details: Any | None = Field(
+        None, description="Optional structured details (e.g. validation errors)."
+    )
 
 
 class ErrorEnvelope(BaseModel):
@@ -29,11 +31,15 @@ class HealthResponse(BaseModel):
     database: str = Field(..., description="'connected' or 'error'.")
     pair_count: int
     price_bar_count: int
-    latest_data_timestamp: Optional[str] = Field(None, description="ISO timestamp of the newest stored bar.")
-    latest_data_source: Optional[str] = Field(None, description="Data source of the newest stored bar.")
+    latest_data_timestamp: str | None = Field(
+        None, description="ISO timestamp of the newest stored bar."
+    )
+    latest_data_source: str | None = Field(
+        None, description="Data source of the newest stored bar."
+    )
     disclaimer: str
 
 
 class MessageResponse(BaseModel):
     message: str
-    details: Optional[dict] = None
+    details: dict | None = None

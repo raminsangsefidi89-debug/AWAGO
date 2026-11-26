@@ -21,8 +21,8 @@
     <div class="brand">
       <img class="logo" src="/static/img/logo-mark.png" alt="نشان AWAGO" width="46" height="46">
       <div class="brand-text">
-        <h1>AWAGO</h1>
-        <p class="subtitle">تحلیل و پیش‌بینی بازار ارز</p>
+        <h1><a href="#/overview" class="brand-link">AWAGO</a></h1>
+        <p class="subtitle">تحلیل و پیش‌بینی بازار ارز — نسخه تحقیقاتی</p>
       </div>
     </div>
     <div class="header-actions">
@@ -39,180 +39,35 @@
     </div>
   </div>
 
-  <section class="hero">
+  <nav class="app-nav" aria-label="ناوبری اصلی">
+    <ul>
+      <li><a href="#/overview">نمای کلی</a></li>
+      <li><a href="#/markets">طلا و دلار</a></li>
+      <li><a href="#/news">اخبار</a></li>
+      <li><a href="#/drivers">محرک‌ها</a></li>
+      <li><a href="#/pair/EUR-USD">جفت‌ارز</a></li>
+      <li><a href="#/compare">مقایسه</a></li>
+      <li><a href="#/models">مدل‌ها</a></li>
+      <li><a href="#/evaluation">ارزیابی</a></li>
+      <li><a href="#/backtests">بک‌تست</a></li>
+      <li><a href="#/quality">کیفیت داده</a></li>
+      <li><a href="#/jobs">کارها</a></li>
+      <li><a href="#/settings">تنظیمات</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero hero-compact">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-overlay" aria-hidden="true"></div>
     <div class="hero-content">
-      <h2>بازار ارز را هوشمندانه تحلیل کنید</h2>
-      <p>قیمت‌ها، روند بازار، اندیکاتورهای تکنیکال و پیش‌بینی چندافقی با بازه اطمینان — همه در یک داشبورد فارسی.</p>
+      <h2>بازار ارز را هوشمندانه و صادقانه تحلیل کنید</h2>
+      <p>پیش‌بینی چندافقی همیشه با عدم قطعیت، کیفیت داده، و نتیجه آماری مقایسه با خط پایه نمایش داده می‌شود.</p>
       <p class="hero-meta">آخرین به‌روزرسانی داده‌ها: <span id="heroLastUpdate" class="num">—</span> · منبع: <span id="heroSource">—</span></p>
     </div>
   </section>
 
   <main class="container">
-
-    <section class="card controls-card">
-      <div class="controls">
-        <label class="field">
-          <span>جفت‌ارز</span>
-          <select id="pairSelect" aria-label="انتخاب جفت‌ارز"></select>
-        </label>
-        <div class="field">
-          <span>بازه زمانی</span>
-          <div id="rangeSelector" class="segmented" role="tablist" aria-label="بازه زمانی">
-            <button type="button" data-range="1m" class="active">۱ ماه</button>
-            <button type="button" data-range="3m">۳ ماه</button>
-            <button type="button" data-range="6m">۶ ماه</button>
-            <button type="button" data-range="1y">۱ سال</button>
-            <button type="button" data-range="all">همه</button>
-          </div>
-        </div>
-        <button id="refreshBtn" class="btn btn-primary" type="button">به‌روزرسانی</button>
-      </div>
-    </section>
-
-    <section id="emptyState" class="state-panel card" hidden>
-      <img src="/static/img/empty-state.webp" onerror="this.onerror=null;this.src='/static/img/empty-state.svg';" alt="تصویر حالت خالی: نمودار بدون داده" width="320" height="240" loading="lazy">
-      <h3>داده‌ای برای نمایش وجود ندارد</h3>
-      <p>برای این جفت‌ارز یا بازه زمانی، هنوز داده‌ای ثبت نشده است. از دکمه «جمع‌آوری داده» استفاده کنید یا داده‌های آزمایشی را بذرپاشی کنید.</p>
-    </section>
-
-    <section id="errorState" class="state-panel card" hidden>
-      <img src="/static/img/error-state.webp" onerror="this.onerror=null;this.src='/static/img/error-state.svg';" alt="تصویر حالت خطا: قطع ارتباط داده" width="320" height="240" loading="lazy">
-      <h3>خطا در دریافت اطلاعات</h3>
-      <p id="errorStateMessage">ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.</p>
-      <button id="retryBtn" class="btn btn-primary" type="button">تلاش مجدد</button>
-    </section>
-
-    <div class="grid grid-2">
-      <section class="card price-card">
-        <h3>قیمت فعلی</h3>
-        <div class="price-main">
-          <span id="pairLabel" class="pair-label">—</span>
-          <span id="currentPrice" class="price num">—</span>
-          <span id="priceChange" class="change">—</span>
-        </div>
-        <div class="price-meta">
-          <span>آخرین داده: <span id="priceTimestamp" class="num">—</span></span>
-          <span id="sourceBadge" class="badge">—</span>
-        </div>
-        <div class="trend-box">
-          <div class="trend-row">
-            <span>روند بازار:</span>
-            <span id="trendDirection" class="trend-pill">—</span>
-          </div>
-          <div class="trend-row">
-            <span>قدرت روند:</span>
-            <div class="strength-bar"><div id="trendStrengthBar" class="strength-fill"></div></div>
-            <span id="trendStrength" class="num">—</span>
-          </div>
-          <div class="trend-row">
-            <span>رژیم نوسان:</span>
-            <span id="volRegime">—</span>
-          </div>
-        </div>
-      </section>
-
-      <section class="card indicators-card">
-        <h3>اندیکاتورهای کلیدی</h3>
-        <div class="indicator-grid">
-          <div class="indicator-chip"><span class="i-name">RSI (۱۴)</span><span id="indRsi" class="i-val num">—</span></div>
-          <div class="indicator-chip"><span class="i-name">MACD</span><span id="indMacd" class="i-val num">—</span></div>
-          <div class="indicator-chip"><span class="i-name">SMA ۲۰</span><span id="indSma20" class="i-val num">—</span></div>
-          <div class="indicator-chip"><span class="i-name">SMA ۵۰</span><span id="indSma50" class="i-val num">—</span></div>
-          <div class="indicator-chip"><span class="i-name">ATR (۱۴)</span><span id="indAtr" class="i-val num">—</span></div>
-          <div class="indicator-chip"><span class="i-name">نوسان سالانه</span><span id="indVol" class="i-val num">—</span></div>
-        </div>
-        <p class="hint">مقادیر بر اساس آخرین داده‌های موجود محاسبه شده‌اند و توصیه معاملاتی نیستند.</p>
-      </section>
-    </div>
-
-    <section class="card chart-card">
-      <h3>نمودار قیمت تاریخی <span id="historyPairLabel" class="card-sub num"></span></h3>
-      <div class="chart-wrap">
-        <canvas id="historyChart" aria-label="نمودار قیمت تاریخی" role="img"></canvas>
-      </div>
-    </section>
-
-    <section class="card forecast-card">
-      <h3>پیش‌بینی قیمت با بازه اطمینان</h3>
-      <div id="horizonSelector" class="segmented" role="tablist" aria-label="افق پیش‌بینی"></div>
-      <div class="forecast-summary">
-        <div class="f-item"><span class="f-label">قیمت پیش‌بینی‌شده</span><span id="forecastPrice" class="f-val num">—</span></div>
-        <div class="f-item"><span class="f-label">بازه اطمینان</span><span id="forecastInterval" class="f-val num">—</span></div>
-        <div class="f-item"><span class="f-label">تاریخ هدف (تقریبی)</span><span id="forecastTarget" class="f-val num">—</span></div>
-      </div>
-      <div class="chart-wrap">
-        <canvas id="forecastChart" aria-label="نمودار پیش‌بینی با بازه اطمینان" role="img"></canvas>
-      </div>
-      <div class="model-info">
-        <h4>اطلاعات مدل</h4>
-        <div class="model-grid">
-          <div><span class="m-label">نام مدل:</span><span id="modelName" class="num">—</span></div>
-          <div><span class="m-label">تاریخ آموزش:</span><span id="modelTrainedAt" class="num">—</span></div>
-          <div><span class="m-label">مقایسه با خط پایه:</span><span id="modelBeats">—</span></div>
-          <div><span class="m-label">خطای MAE مدل:</span><span id="modelMae" class="num">—</span></div>
-        </div>
-        <p id="beatsNote" class="hint"></p>
-      </div>
-    </section>
-
-    <section class="card metrics-card">
-      <h3>ارزیابی مدل‌ها در برابر خط پایه</h3>
-      <div class="table-wrap">
-        <table class="metrics-table">
-          <thead>
-            <tr>
-              <th>افق (روز)</th>
-              <th>مدل</th>
-              <th>MAE</th>
-              <th>RMSE</th>
-              <th>sMAPE</th>
-              <th>دقت جهت</th>
-              <th>MAE خط پایه (ساده)</th>
-              <th>نتیجه مقایسه</th>
-            </tr>
-          </thead>
-          <tbody id="metricsBody">
-            <tr><td colspan="8" class="empty-cell">در حال بارگذاری…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="hint">ارزیابی با روش «پیش‌روی زمانی» (walk-forward) روی داده‌های گذشته انجام شده است. معیار دقت جهت برای خط پایه «ساده» تعریف نمی‌شود (پیش‌بینی بدون تغییر). نتایج تضمین‌کننده سود نیستند.</p>
-    </section>
-
-    <section class="card jobs-card">
-      <h3>عملیات داده و مدل</h3>
-      <div class="jobs-actions">
-        <button id="collectBtn" class="btn btn-secondary" type="button">جمع‌آوری داده</button>
-        <button id="trainBtn" class="btn btn-primary" type="button">آموزش مدل‌ها</button>
-      </div>
-      <div id="jobStatus" class="job-status" hidden>
-        <img src="/static/img/training-state.webp" onerror="this.onerror=null;this.src='/static/img/training-state.svg';" alt="تصویر در حال آموزش مدل" width="240" height="180" loading="lazy">
-        <div class="job-info">
-          <p id="jobMessage">در حال اجرا…</p>
-          <div class="progress-bar"><div id="jobProgress" class="progress-fill"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="features">
-      <article class="card feature-card">
-        <img src="/static/img/card-forecast.webp" onerror="this.onerror=null;this.src='/static/img/card-forecast.svg';" alt="تصویر پیش‌بینی: مسیر قیمت آینده با مخروط عدم قطعیت" width="640" height="400" loading="lazy">
-        <h3>پیش‌بینی چندافقی</h3>
-        <p>پیش‌بینی قیمت برای افق‌های ۱، ۷ و ۳۰ روزه همراه با بازه اطمینان ۹۰ درصدی، بر پایه مدل‌های یادگیری ماشین و ارزیابی زمان‌بندی‌شده.</p>
-      </article>
-      <article class="card feature-card">
-        <img src="/static/img/card-trend.webp" onerror="this.onerror=null;this.src='/static/img/card-trend.svg';" alt="تصویر تحلیل روند: خط روند روی نوسانات قیمت" width="640" height="400" loading="lazy">
-        <h3>تحلیل روند بازار</h3>
-        <p>جهت، قدرت، شیب و رژیم نوسانی بازار به‌صورت خودکار محاسبه می‌شود تا تصویر روشنی از وضعیت فعلی داشته باشید.</p>
-      </article>
-      <article class="card feature-card">
-        <img src="/static/img/card-evaluation.webp" onerror="this.onerror=null;this.src='/static/img/card-evaluation.svg';" alt="تصویر ارزیابی مدل: مقایسه منحنی مدل با خط پایه" width="640" height="400" loading="lazy">
-        <h3>ارزیابی صادقانه</h3>
-        <p>هر مدل با خط پایه ساده مقایسه می‌شود و نتیجه — از جمله زمانی که مدل بهتر از خط پایه نیست — صادقانه در داشبورد نمایش داده می‌شود.</p>
-      </article>
-    </section>
+    <div id="page" class="page-mount" aria-live="polite"></div>
   </main>
 
   <footer class="site-footer">
@@ -226,6 +81,6 @@
   </footer>
 
   <script src="/static/vendor/chartjs/chart.umd.js"></script>
-  <script src="/static/js/app.js"></script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>

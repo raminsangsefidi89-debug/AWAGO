@@ -321,3 +321,114 @@ AWAGO does not promise profit, does not issue buy/sell instructions, and its
 forecasts — including prediction intervals — can be wrong. Past back-test
 performance (walk-forward or otherwise) does not guarantee future results.
 Use at your own risk.
+
+---
+
+# AWAGO v2 — research-grade evolution
+
+v2 turns AWAGO into a probabilistic forecasting **research platform** with
+statistical honesty guarantees. Everything below describes what is actually
+implemented and measured in this repository (see `docs/PROGRESS.md` for the
+per-phase status table).
+
+## Architecture
+
+```mermaid
+flowchart TD
+  subgraph Providers["Data layer"]
+    D[DemoProvider seeded] --> R[ResilientProvider\nTTL cache + circuit breaker]
+    F[Frankfurter ECB unverified] --> R
+    S[Stooq unverified] --> R
+    C[CSV import user files] --> R
+    R --> M[(SQLite meta + bars\nprovenance columns)]
+    M --> P[(Parquet mirrors\ndata/series/)]
+    M --> Q[Quality engine\ngaps/stale/Hampel/OHLC/triangular]
+  end
+  subgraph ML["Model platform"]
+    M --> FS[Feature store v3\npoint-in-time by construction]
+    FS --> LA[Leakage audit\nperturb-future + corr]
+    FS --> WF[Purged walk-forward harness\nexpanding/rolling + embargo]
+    REG[Plugin registry\nbaseline/statistical/ml/deep/ensemble/prob] --> WF
+    WF --> MET[Metrics + DM-Harvey + Holm]
+    MET --> LB[(Leaderboards + artifacts\nrun/config/snapshot hashes)]
+    MET --> REP[Persian RTL report\ncomputed outputs only]
+  end
+  subgraph UI["Presentation"]
+    API[FastAPI /api/v1\nrate-limit + ETag + SSE] --> DASH[Persian RTL SPA\n9 pages, Jalali, honesty badges]
+    LB --> API
+    Q --> API
+  end
+```
+
+## Data sources
+
+| Provider | Type | Key | Verified live in build env | Notes |
+|---|---|---|---|---|
+| `demo` | seeded synthetic | no | yes | Default. Deterministic, always labeled. |
+| `frankfurter` | ECB reference rates | no | **no** | Unverified — sandbox cannot reach it. Confirm via `/api/v1/providers`. |
+| `stooq` | daily CSV endpoint | no | **no** | Unverified. Respect rate limits; check stooq.com terms. |
+| `csv_import` | local files in `data/imports/` | no | yes | **The sanctioned path for IRR / any rate without a legitimate API.** |
+
+Evaluated but NOT implemented (reasons in `docs/DATA_SOURCES.md`): FRED,
+Alpha Vantage, Twelve Data (API keys, unverifiable here), Yahoo (no official
+API), any scraping (rejected). Demo/real separation is enforced at schema
+level (`CHECK (is_demo = (data_source = 'demo'))`).
+
+## Model catalog
+
+| Family | Models | Notes |
+|---|---|---|
+| Baselines | naive, drift, seasonal-naive(7d), MA(20), Holt ETS | The yardstick every model is judged against. |
+| Statistical | ARIMA(1,1,1) (bounded refit cadence), GARCH(1,1) vol (optional `arch`) | GARCH forecasts σ only (direction = 0 by design). |
+| Classical ML | Ridge, ElasticNet, RandomForest, ExtraTrees, HistGB (direct), Ridge-recursive | Direct multi-horizon (one model per horizon). |
+| Deep (lite) | MLP (sklearn, no torch) | Torch LSTM/N-BEATS/TFT documented as skipped. |
+| Ensembles | average, inverse-error, stacking, online-decayed | Weights/meta fit on earlier OOF folds only; fall back to baseline on failure. |
+| Probabilistic | QuantileGBM, split conformal, CQR, adaptive conformal | Always reports empirical vs nominal coverage. |
+
+## Evaluation methodology
+
+* Targets: future log returns; features strictly point-in-time (leakage
+  harness with negative tests).
+* Walk-forward only (expanding/rolling), **purged** (horizon−1) + embargo.
+* Metrics: MAE, RMSE, MASE, sMAPE, directional accuracy, pinball, CRPS,
+  coverage, interval width, Winkler.
+* Significance: Diebold-Mariano (Harvey-Leybourne-Newbold correction) vs the
+  naive baseline on identical rows, Holm-Bonferroni across the family.
+* Verdicts are one of: `beats baseline significantly` / `beats baseline, not
+  significantly` / `worse than baseline (significant)` / `not better than
+  baseline`.
+* Holdout (tail 20%) is evaluated **once per family** ("held out, evaluated
+  once").
+* Backtests are **simulations**: sign positions, 1x notional, no leverage,
+  mandatory costs + slippage, buy-and-hold AND seeded random-signal controls,
+  deflated-Sharpe caution, and the disclaimer on every screen.
+
+## v2 API additions (v1 contract kept)
+
+`/api/v1/features` · `/api/v1/quality/{pair}` · `/api/v1/providers` ·
+`/api/v1/experiments/run(s)` · `/api/v1/leaderboards/*` ·
+`/api/v1/registry/{models,artifacts,compare,promote,rollback}` ·
+`/api/v1/regimes/{pair}` · `/api/v1/volatility/{pair}` ·
+`/api/v1/forecasts/probabilistic/{pair}` (fan chart + empirical coverage) ·
+`/api/v1/backtests/{pair}` · `/api/v1/explainability/{pair}` ·
+`/api/v1/drift/{pair}` · `/api/v1/reports/{run_id}` ·
+`/api/v1/pairs/{pair}/export?format=csv|parquet` ·
+`/api/v1/jobs/{id}/events` (SSE) · `/api/v1/jobs/{id}/cancel`
+
+## v2 run commands
+
+Same one-command launchers as v1:
+
+```bash
+./run.sh                 # lite profile (default): few-minute first run
+./run.sh --profile full  # all pairs, more folds/models
+python run.py --help     # every flag documented
+python -m app.cli config show        # redacted configuration
+python -m app.cli report --run latest --out report.html   # Persian report
+make lint && make test   # quality gates
+```
+
+Environment facts (honesty): the build sandbox cannot reach market-data
+hosts, GitHub Actions could not be executed here, and the Windows launcher
+(`run.bat`) is untested in this environment. Every real provider ships
+labeled "unverified" until you confirm it on your network.

@@ -6,9 +6,8 @@ Access control: localhost only, or any host with a valid X-API-Token
 
 from __future__ import annotations
 
-from typing import Optional
-
 from fastapi import APIRouter, Depends, Request
+from fastapi.responses import StreamingResponse
 
 from app.api.deps import require_job_access
 from app.api.errors import BadRequestError, NotFoundError
@@ -51,20 +50,21 @@ def _job_status(job) -> JobStatus:
 )
 def start_collect_job(
     request: Request,
-    body: Optional[JobRequest] = None,
+    body: JobRequest | None = None,
     settings: Settings = Depends(get_settings),
 ) -> JobStatus:
     """Fetch and store price history for the configured pairs (background job)."""
+    _ = settings
     require_job_access(request)
-    params = {"pairs": (body.pairs if body else None)}
-    if params["pairs"]:
+    pairs: list[str] | None = None
+    if body and body.pairs:
         from app.services.market import validate_pair_symbol
 
         try:
-            params["pairs"] = [validate_pair_symbol(p) for p in params["pairs"]]
+            pairs = [validate_pair_symbol(p) for p in body.pairs]
         except ValueError as exc:
             raise BadRequestError(str(exc), code="invalid_pair_format") from exc
-    job = job_manager.submit("collect-data", params)
+    job = job_manager.submit("collect-data", {"pairs": pairs})
     return _job_status(job)
 
 
@@ -73,25 +73,27 @@ def start_collect_job(
     response_model=JobStatus,
     summary="Start a model-training job",
 )
-def start_train_job(request: Request, body: Optional[JobRequest] = None) -> JobStatus:
+def start_train_job(request: Request, body: JobRequest | None = None) -> JobStatus:
     """Train forecasting models for the configured pairs/horizons (background job)."""
     require_job_access(request)
-    params = {
-        "pairs": (body.pairs if body else None),
-        "horizons": (body.horizons if body else None),
-        "quick": bool(body.quick) if body else False,
-    }
-    if params["pairs"]:
+    pairs: list[str] | None = None
+    if body and body.pairs:
         from app.services.market import validate_pair_symbol
 
         try:
-            params["pairs"] = [validate_pair_symbol(p) for p in params["pairs"]]
+            pairs = [validate_pair_symbol(p) for p in body.pairs]
         except ValueError as exc:
             raise BadRequestError(str(exc), code="invalid_pair_format") from exc
-    if params["horizons"]:
-        params["horizons"] = [int(h) for h in params["horizons"]]
-        if any(h <= 0 or h > 365 for h in params["horizons"]):
+    horizons: list[int] | None = None
+    if body and body.horizons:
+        horizons = [int(h) for h in body.horizons]
+        if any(h <= 0 or h > 365 for h in horizons):
             raise BadRequestError("Horizons must be integers in 1..365", code="invalid_horizon")
+    params: dict = {
+        "pairs": pairs,
+        "horizons": horizons,
+        "quick": bool(body.quick) if body else False,
+    }
     job = job_manager.submit("train", params)
     return _job_status(job)
 
@@ -110,4 +112,41 @@ def get_job(request: Request, job_id: str) -> JobStatus:
     job = job_manager.get(job_id)
     if job is None:
         raise NotFoundError(f"Job not found: {job_id}", code="job_not_found")
+    return _job_status(job)
+
+
+@router.get("/jobs/{job_id}/events", summary="SSE stream of job progress")
+def stream_job(request: Request, job_id: str):
+    """Server-sent events: {status, progress, message} every ~0.7s until done."""
+    import asyncio
+    import json as _json
+
+    require_job_access(request)
+    if job_manager.get(job_id) is None:
+        raise NotFoundError(f"Job not found: {job_id}", code="job_not_found")
+
+    async def _gen():
+        while True:
+            job = job_manager.get(job_id)
+            if job is None:
+                break
+            payload = _json.dumps(
+                {"status": job.status, "progress": job.progress, "message": job.message}
+            )
+            yield f"data: {payload}\n\n"
+            if job.status in ("done", "failed", "cancelled"):
+                break
+            await asyncio.sleep(0.7)
+
+    return StreamingResponse(_gen(), media_type="text/event-stream")
+
+
+@router.post("/jobs/{job_id}/cancel", response_model=JobStatus, summary="Request job cancellation")
+def cancel_job(request: Request, job_id: str) -> JobStatus:
+    """Cooperatively cancel a queued or running job."""
+    require_job_access(request)
+    if not job_manager.request_cancel(job_id):
+        raise NotFoundError(f"Job not found: {job_id}", code="job_not_found")
+    job = job_manager.get(job_id)
+    assert job is not None
     return _job_status(job)

@@ -50,20 +50,24 @@ def svg_header(w: int, h: int, bg: str = NAVY) -> str:
 def grid(w: int, h: int, step: int = 64, opacity: float = 0.12) -> str:
     lines = []
     for x in range(0, w + 1, step):
-        lines.append(f'<line x1="{x}" y1="0" x2="{x}" y2="{h}" stroke="{TEAL}" stroke-opacity="{opacity}" stroke-width="1"/>')
+        lines.append(
+            f'<line x1="{x}" y1="0" x2="{x}" y2="{h}" stroke="{TEAL}" stroke-opacity="{opacity}" stroke-width="1"/>'
+        )
     for y in range(0, h + 1, step):
-        lines.append(f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="{TEAL}" stroke-opacity="{opacity}" stroke-width="1"/>')
+        lines.append(
+            f'<line x1="0" y1="{y}" x2="{w}" y2="{y}" stroke="{TEAL}" stroke-opacity="{opacity}" stroke-width="1"/>'
+        )
     return "".join(lines)
 
 
 def hero_bg() -> str:
     w, h = 1920, 800
     s = svg_header(w, h) + grid(w, h, 80, 0.10)
-    s += f'<ellipse cx="520" cy="420" rx="620" ry="360" fill="url(#glow)"/>'
+    s += '<ellipse cx="520" cy="420" rx="620" ry="360" fill="url(#glow)"/>'
     # candlestick-like bars on the left half
     xs = [120, 200, 280, 360, 440, 520, 600, 680, 760]
     heights = [120, 220, 160, 300, 240, 380, 300, 420, 340]
-    for x, hh in zip(xs, heights):
+    for x, hh in zip(xs, heights, strict=False):
         y = 560 - hh
         s += f'<rect x="{x}" y="{y}" width="34" height="{hh}" rx="6" fill="{TEAL}" fill-opacity="0.28"/>'
         s += f'<rect x="{x + 11}" y="{y - 34}" width="12" height="{hh + 68}" rx="6" fill="{TEAL}" fill-opacity="0.5"/>'
@@ -92,11 +96,13 @@ def logo_mark() -> str:
         f'<defs><linearGradient id="tg" x1="0" y1="1" x2="1" y2="0">'
         f'<stop offset="0%" stop-color="{TEAL}"/><stop offset="100%" stop-color="{GOLD}"/></linearGradient></defs>'
     )
-    s += f'<circle cx="512" cy="512" r="380" fill="none" stroke="url(#tg)" stroke-width="36"/>'
+    s += '<circle cx="512" cy="512" r="380" fill="none" stroke="url(#tg)" stroke-width="36"/>'
     s += f'<circle cx="512" cy="512" r="300" fill="none" stroke="{TEAL}" stroke-opacity="0.35" stroke-width="10"/>'
     # upward arrow
-    s += f'<path d="M 320 640 L 512 380 L 704 640" fill="none" stroke="url(#tg)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>'
-    s += f'<path d="M 512 420 L 512 700" stroke="url(#tg)" stroke-width="64" stroke-linecap="round"/>'
+    s += '<path d="M 320 640 L 512 380 L 704 640" fill="none" stroke="url(#tg)" stroke-width="64" stroke-linecap="round" stroke-linejoin="round"/>'
+    s += (
+        '<path d="M 512 420 L 512 700" stroke="url(#tg)" stroke-width="64" stroke-linecap="round"/>'
+    )
     # wave
     s += (
         f'<path d="M 300 760 C 380 700, 440 820, 512 760 S 660 700, 724 760" '
@@ -205,7 +211,7 @@ def card_evaluation() -> str:
 def og_image() -> str:
     w, h = 1200, 630
     s = svg_header(w, h) + grid(w, h, 60, 0.09)
-    s += f'<ellipse cx="600" cy="330" rx="420" ry="240" fill="url(#glow)"/>'
+    s += '<ellipse cx="600" cy="330" rx="420" ry="240" fill="url(#glow)"/>'
     s += f'<circle cx="600" cy="315" r="190" fill="none" stroke="{TEAL}" stroke-opacity="0.55" stroke-width="4"/>'
     for ang in range(0, 360, 30):
         import math
@@ -222,6 +228,7 @@ def og_image() -> str:
 # ----------------------------------------------------------------------
 # Procedural logo + favicons (PNG with alpha) via Pillow
 # ----------------------------------------------------------------------
+
 
 def png_logo_and_favicons() -> None:
     from PIL import Image, ImageDraw
@@ -254,26 +261,86 @@ def png_logo_and_favicons() -> None:
 # ------------------------------------------------------------------
 
 IMAGES = [
-    ("hero-bg.webp", 1920, 800, "Dashboard header/hero background behind a dark gradient overlay.",
-     "Wide abstract banner background representing global currency markets: flowing luminous candlestick-like bars and smooth glowing price curves over a faint world-grid, depth of field, calm and professional, leave the center-right area relatively empty for overlay text.", hero_bg),
-    ("logo-mark.png", 1024, 1024, "AWAGO emblem in the header, favicon source (32x32 and 180x180 exports).",
-     "Minimal abstract emblem for a forecasting platform: a stylized upward-curving arrow blended with a wave and a subtle compass-like ring, geometric, symmetrical, teal and gold gradient on a transparent background, flat vector look, no text.", logo_mark),
-    ("empty-state.webp", 800, 600, "Shown when no data is available for the selected pair/range.",
-     "Illustration of an empty chart panel: a clean dashboard frame with a faint dotted baseline and a small magnifying glass hovering over blank space, soft glow, friendly and calm mood.", empty_state),
-    ("error-state.webp", 800, 600, "Shown on API/network errors.",
-     "Illustration of a disconnected data link: two glowing nodes with a gently broken connecting line and small sparks, a subtle warning-amber accent, calm rather than alarming, tidy composition.", error_state),
-    ("training-state.webp", 800, 600, "Shown while a model training or data collection job is running.",
-     "Illustration of a machine-learning model being trained: layered translucent neural-network nodes connected by glowing lines feeding into a rising line chart, sense of motion and progress.", training_state),
-    ("demo-banner-bg.webp", 1600, 300, "Background of the prominent Demo-data banner, under a semi-transparent overlay.",
-     "Wide thin strip pattern in amber and navy: diagonal soft hatching with faint broken chart lines, indicating a simulated environment, subtle, low contrast, seamless feel.", demo_banner_bg),
-    ("card-forecast.webp", 640, 400, "Illustration for the forecast feature card.",
-     "A smooth price line that continues into the future as a dashed glowing path, surrounded by a translucent widening cone representing uncertainty, on a dark grid.", card_forecast),
-    ("card-trend.webp", 640, 400, "Illustration for the trend-analysis feature card.",
-     "A noisy price series with a clean bright trend line cutting through it and a subtle directional arrow, layered moving-average ribbons in teal and gold, dark grid.", card_trend),
-    ("card-evaluation.webp", 640, 400, "Illustration for the model-evaluation feature card.",
-     "Two competing glowing curves, one labeled-by-color as the model and one as the baseline, with a magnified comparison zone and a small balance-scale motif, dark grid, no text.", card_evaluation),
-    ("og-image.webp", 1200, 630, "Social preview (Open Graph / Twitter card) referenced in the HTML head.",
-     "Cinematic wide composition of a futuristic currency analytics dashboard floating in space: glowing charts, forecast bands, and a faint globe made of data points, centered focal point with generous margins, no text.", og_image),
+    (
+        "hero-bg.webp",
+        1920,
+        800,
+        "Dashboard header/hero background behind a dark gradient overlay.",
+        "Wide abstract banner background representing global currency markets: flowing luminous candlestick-like bars and smooth glowing price curves over a faint world-grid, depth of field, calm and professional, leave the center-right area relatively empty for overlay text.",
+        hero_bg,
+    ),
+    (
+        "logo-mark.png",
+        1024,
+        1024,
+        "AWAGO emblem in the header, favicon source (32x32 and 180x180 exports).",
+        "Minimal abstract emblem for a forecasting platform: a stylized upward-curving arrow blended with a wave and a subtle compass-like ring, geometric, symmetrical, teal and gold gradient on a transparent background, flat vector look, no text.",
+        logo_mark,
+    ),
+    (
+        "empty-state.webp",
+        800,
+        600,
+        "Shown when no data is available for the selected pair/range.",
+        "Illustration of an empty chart panel: a clean dashboard frame with a faint dotted baseline and a small magnifying glass hovering over blank space, soft glow, friendly and calm mood.",
+        empty_state,
+    ),
+    (
+        "error-state.webp",
+        800,
+        600,
+        "Shown on API/network errors.",
+        "Illustration of a disconnected data link: two glowing nodes with a gently broken connecting line and small sparks, a subtle warning-amber accent, calm rather than alarming, tidy composition.",
+        error_state,
+    ),
+    (
+        "training-state.webp",
+        800,
+        600,
+        "Shown while a model training or data collection job is running.",
+        "Illustration of a machine-learning model being trained: layered translucent neural-network nodes connected by glowing lines feeding into a rising line chart, sense of motion and progress.",
+        training_state,
+    ),
+    (
+        "demo-banner-bg.webp",
+        1600,
+        300,
+        "Background of the prominent Demo-data banner, under a semi-transparent overlay.",
+        "Wide thin strip pattern in amber and navy: diagonal soft hatching with faint broken chart lines, indicating a simulated environment, subtle, low contrast, seamless feel.",
+        demo_banner_bg,
+    ),
+    (
+        "card-forecast.webp",
+        640,
+        400,
+        "Illustration for the forecast feature card.",
+        "A smooth price line that continues into the future as a dashed glowing path, surrounded by a translucent widening cone representing uncertainty, on a dark grid.",
+        card_forecast,
+    ),
+    (
+        "card-trend.webp",
+        640,
+        400,
+        "Illustration for the trend-analysis feature card.",
+        "A noisy price series with a clean bright trend line cutting through it and a subtle directional arrow, layered moving-average ribbons in teal and gold, dark grid.",
+        card_trend,
+    ),
+    (
+        "card-evaluation.webp",
+        640,
+        400,
+        "Illustration for the model-evaluation feature card.",
+        "Two competing glowing curves, one labeled-by-color as the model and one as the baseline, with a magnified comparison zone and a small balance-scale motif, dark grid, no text.",
+        card_evaluation,
+    ),
+    (
+        "og-image.webp",
+        1200,
+        630,
+        "Social preview (Open Graph / Twitter card) referenced in the HTML head.",
+        "Cinematic wide composition of a futuristic currency analytics dashboard floating in space: glowing charts, forecast bands, and a faint globe made of data points, centered focal point with generous margins, no text.",
+        og_image,
+    ),
 ]
 
 
@@ -312,7 +379,11 @@ def main() -> int:
     print("  wrote logo-mark.png, favicon-32x32.png, apple-touch-icon-180x180.png")
 
     (IMG_DIR / "manifest.json").write_text(
-        json.dumps({"images": manifest, "image_limit": 10, "generated_count": 0}, indent=2, ensure_ascii=False),
+        json.dumps(
+            {"images": manifest, "image_limit": 10, "generated_count": 0},
+            indent=2,
+            ensure_ascii=False,
+        ),
         encoding="utf-8",
     )
     print("  wrote manifest.json")

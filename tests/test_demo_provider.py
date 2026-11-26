@@ -17,7 +17,7 @@ def test_deterministic_same_seed_same_data():
     bars_a = a.fetch_history("EUR/USD", start, end)
     bars_b = b.fetch_history("EUR/USD", start, end)
     assert len(bars_a) == len(bars_b) > 30
-    for x, y in zip(bars_a, bars_b):
+    for x, y in zip(bars_a, bars_b, strict=False):
         assert x.timestamp == y.timestamp
         assert x.close == y.close
         assert x.high == y.high
@@ -29,7 +29,7 @@ def test_different_seed_different_data():
     start = end - timedelta(days=60)
     a = DemoProvider(seed=1).fetch_history("EUR/USD", start, end)
     b = DemoProvider(seed=2).fetch_history("EUR/USD", start, end)
-    assert any(x.close != y.close for x, y in zip(a, b))
+    assert any(x.close != y.close for x, y in zip(a, b, strict=False))
 
 
 def test_past_values_stable_when_time_advances():
@@ -60,7 +60,7 @@ def test_volatility_clustering_present():
     bars = p.fetch_history("EUR/USD", date.today() - timedelta(days=800), date.today())
     closes = np.array([b.close for b in bars])
     rets = np.diff(np.log(closes))
-    sq = rets ** 2
+    sq = rets**2
     autocorr_ret = abs(np.corrcoef(rets[:-1], rets[1:])[0, 1])
     autocorr_sq = abs(np.corrcoef(sq[:-1], sq[1:])[0, 1])
     assert autocorr_sq > autocorr_ret
