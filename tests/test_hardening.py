@@ -15,7 +15,7 @@ from app.services.evaluation.walkforward import purged_splits
 from app.services.features.builders import build_core_features
 from app.services.jalali import gregorian_to_jalali, jalali_to_gregorian
 from app.services.models.probabilistic import adaptive_conformal, split_conformal
-from app.services.storage.series import read_series, write_series
+from app.services.storage.series import read_series
 
 # ----------------------------------------------------------------------
 # Property tests (hypothesis)
@@ -118,13 +118,6 @@ class TestFailureInjection:
         assert provider.last_source == "demo"
 
     def test_corrupt_parquet_reads_empty_or_raises_cleanly(self, tmp_path):
-        path = tmp_path / "series"
-        write_series(
-            pd.DataFrame({"timestamp": pd.date_range("2024-0-1", periods=0)}),
-            "X",
-            "y",
-            series_dir=tmp_path,
-        ) if False else None
         # write a corrupt file manually
         bad = tmp_path / "BAD_PAIR__BAD.parquet"
         bad.write_bytes(b"this is not parquet")

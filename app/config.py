@@ -185,8 +185,30 @@ class LLMSettings(_BaseSettings):
     llm_api_key: str = ""
 
 
+class MarketSettings(_BaseSettings):
+    """Gold/dollar market layer (addendum). Iran-market data is always
+    labelled as unofficial market quotes regardless of switches."""
+
+    market_global_enabled: bool = True
+    market_iran_enabled: bool = True
+    # display preference for IRR amounts; storage is always rial
+    market_prefer_toman: bool = True
+    # multi-source consensus + quality thresholds
+    market_consensus_mad_k: float = 3.0
+    market_cross_warn_pct: float = 10.0
+    # news layer
+    news_enabled: bool = True
+    news_poll_seconds: int = 900  # polite polling; never hammer sources
+
+
 class Settings(
-    ServerSettings, StorageSettings, DataSettings, ModelSettings, SchedulerSettings, LLMSettings
+    ServerSettings,
+    StorageSettings,
+    DataSettings,
+    ModelSettings,
+    SchedulerSettings,
+    LLMSettings,
+    MarketSettings,
 ):
     """All runtime configuration. Environment variables override the defaults.
 
